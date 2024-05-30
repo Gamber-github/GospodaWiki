@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GospodaWiki", "GospodaWiki\GospodaWiki.csproj", "{036CF59A-D58C-42B0-A893-9E8D2B0E401C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{036CF59A-D58C-42B0-A893-9E8D2B0E401C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{036CF59A-D58C-42B0-A893-9E8D2B0E401C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{036CF59A-D58C-42B0-A893-9E8D2B0E401C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{036CF59A-D58C-42B0-A893-9E8D2B0E401C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8D4404A0-EFC8-4988-83CF-64265BF13D07}
+	EndGlobalSection
+EndGlobal
