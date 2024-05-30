@@ -8,6 +8,6 @@
         public string Type { get; set; }
         public string Place { get; set; }
         public string Tags { get; set; }
-        public CharacterEquipment CharacterEquipment { get; set; }
+        public ICollection<CharacterEquipment> CharacterEquipments { get; set; }
     }
 }

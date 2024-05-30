@@ -8,12 +8,11 @@
         public int Age { get; set; }
         public DateTime Birthday { get; set; }
         public string Biography { get; set; }
-        public string Image { get; set; }
-        public City City { get; set; }
-        public Country Country { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
         public ICollection<Tag> Tags { get; set; }
-        public CharacterAbility CharacterAbility { get; set; }
-        public CharacterEquipment CharacterEquipment { get; set; }
-        public RpgSystemCharacter RpgSystemCharacter { get; set; }
+        public ICollection<CharacterAbility> CharacterAbilities { get; set; }
+        public ICollection<CharacterEquipment> CharacterEquipments { get; set; }
+        public ICollection<RpgSystemCharacter> RpgSystemCharacters { get; set; }
     }
 }
