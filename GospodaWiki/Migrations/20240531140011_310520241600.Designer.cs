@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GospodaWiki.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240530193436_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240531140011_310520241600")]
+    partial class _310520241600
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -84,7 +84,12 @@ namespace GospodaWiki.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RpgSystemId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RpgSystemId");
 
                     b.ToTable("Characters");
                 });
@@ -173,21 +178,6 @@ namespace GospodaWiki.Migrations
                     b.ToTable("RpgSystems");
                 });
 
-            modelBuilder.Entity("GospodaWiki.Models.RpgSystemCharacter", b =>
-                {
-                    b.Property<int>("CharcterId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RpgSystemId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CharcterId", "RpgSystemId");
-
-                    b.HasIndex("RpgSystemId");
-
-                    b.ToTable("RpgSystemCharacters");
-                });
-
             modelBuilder.Entity("GospodaWiki.Models.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -239,6 +229,17 @@ namespace GospodaWiki.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("GospodaWiki.Models.Character", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
+                        .WithMany()
+                        .HasForeignKey("RpgSystemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RpgSystem");
+                });
+
             modelBuilder.Entity("GospodaWiki.Models.CharacterAbility", b =>
                 {
                     b.HasOne("GospodaWiki.Models.Ability", "Ability")
@@ -277,25 +278,6 @@ namespace GospodaWiki.Migrations
                     b.Navigation("Equipment");
                 });
 
-            modelBuilder.Entity("GospodaWiki.Models.RpgSystemCharacter", b =>
-                {
-                    b.HasOne("GospodaWiki.Models.Character", "Character")
-                        .WithMany("RpgSystemCharacters")
-                        .HasForeignKey("CharcterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
-                        .WithMany("RpgSystemCharacters")
-                        .HasForeignKey("RpgSystemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
-
-                    b.Navigation("RpgSystem");
-                });
-
             modelBuilder.Entity("GospodaWiki.Models.Tag", b =>
                 {
                     b.HasOne("GospodaWiki.Models.Character", null)
@@ -318,8 +300,6 @@ namespace GospodaWiki.Migrations
 
                     b.Navigation("CharacterEquipments");
 
-                    b.Navigation("RpgSystemCharacters");
-
                     b.Navigation("Tags");
                 });
 
@@ -330,8 +310,6 @@ namespace GospodaWiki.Migrations
 
             modelBuilder.Entity("GospodaWiki.Models.RpgSystem", b =>
                 {
-                    b.Navigation("RpgSystemCharacters");
-
                     b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618

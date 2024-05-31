@@ -1,6 +1,8 @@
-﻿namespace GospodaWiki.Models
+﻿using GospodaWiki.Models;
+
+namespace GospodaWiki.Dto
 {
-    public class Character
+    public class CharacterDto
     {
         public int Id { get; set; }
         public string FirstName { get; set; } = null!;
@@ -12,7 +14,5 @@
         public string Country { get; set; } = null!;
         public ICollection<Tag> Tags { get; set; } = [];
         public RpgSystem RpgSystem { get; set; } = null!;
-        public ICollection<CharacterAbility> CharacterAbilities { get; set; }
-        public ICollection<CharacterEquipment> CharacterEquipments { get; set; }
     }
 }

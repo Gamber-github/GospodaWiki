@@ -16,7 +16,6 @@ namespace GospodaWiki.Data
         public DbSet<CharacterEquipment> CharacterEquipments { get; set; }
         public DbSet<Equipment> Equipment { get; set; }
         public DbSet<RpgSystem> RpgSystems { get; set; }
-        public DbSet<RpgSystemCharacter> RpgSystemCharacters { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<User> Users { get; set; }
 
@@ -43,17 +42,6 @@ namespace GospodaWiki.Data
                 .HasOne(e => e.Equipment)
                 .WithMany(ce => ce.CharacterEquipments)
                 .HasForeignKey(a => a.EquipmentId);
-
-            modelBuilder.Entity<RpgSystemCharacter>()
-                .HasKey(sc => new { sc.CharcterId, sc.RpgSystemId });
-            modelBuilder.Entity<RpgSystemCharacter>()
-                .HasOne(s => s.RpgSystem)
-                .WithMany(sc => sc.RpgSystemCharacters)
-                .HasForeignKey(s => s.RpgSystemId);
-            modelBuilder.Entity<RpgSystemCharacter>()
-                .HasOne(c => c.Character)
-                .WithMany(ce => ce.RpgSystemCharacters)
-                .HasForeignKey(c => c.CharcterId);
         }
     }
 }

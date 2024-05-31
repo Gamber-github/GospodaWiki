@@ -4,6 +4,7 @@ using GospodaWiki.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GospodaWiki.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240531130404_310520241503")]
+    partial class _310520241503
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,12 +84,7 @@ namespace GospodaWiki.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RpgSystemId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("RpgSystemId");
 
                     b.ToTable("Characters");
                 });
@@ -175,6 +173,21 @@ namespace GospodaWiki.Migrations
                     b.ToTable("RpgSystems");
                 });
 
+            modelBuilder.Entity("GospodaWiki.Models.RpgSystemCharacter", b =>
+                {
+                    b.Property<int>("CharcterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RpgSystemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CharcterId", "RpgSystemId");
+
+                    b.HasIndex("RpgSystemId");
+
+                    b.ToTable("RpgSystemCharacters");
+                });
+
             modelBuilder.Entity("GospodaWiki.Models.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -226,17 +239,6 @@ namespace GospodaWiki.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("GospodaWiki.Models.Character", b =>
-                {
-                    b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
-                        .WithMany()
-                        .HasForeignKey("RpgSystemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RpgSystem");
-                });
-
             modelBuilder.Entity("GospodaWiki.Models.CharacterAbility", b =>
                 {
                     b.HasOne("GospodaWiki.Models.Ability", "Ability")
@@ -275,6 +277,25 @@ namespace GospodaWiki.Migrations
                     b.Navigation("Equipment");
                 });
 
+            modelBuilder.Entity("GospodaWiki.Models.RpgSystemCharacter", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.Character", "Character")
+                        .WithMany("RpgSystemCharacters")
+                        .HasForeignKey("CharcterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
+                        .WithMany("RpgSystemCharacters")
+                        .HasForeignKey("RpgSystemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("RpgSystem");
+                });
+
             modelBuilder.Entity("GospodaWiki.Models.Tag", b =>
                 {
                     b.HasOne("GospodaWiki.Models.Character", null)
@@ -297,6 +318,8 @@ namespace GospodaWiki.Migrations
 
                     b.Navigation("CharacterEquipments");
 
+                    b.Navigation("RpgSystemCharacters");
+
                     b.Navigation("Tags");
                 });
 
@@ -307,6 +330,8 @@ namespace GospodaWiki.Migrations
 
             modelBuilder.Entity("GospodaWiki.Models.RpgSystem", b =>
                 {
+                    b.Navigation("RpgSystemCharacters");
+
                     b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618
