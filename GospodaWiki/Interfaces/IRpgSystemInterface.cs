@@ -8,5 +8,7 @@ namespace GospodaWiki.Interfaces
         RpgSystem GetRpgSystem(int id);
         RpgSystem GetRpgSystem(string name);
         bool RpgSystemExists(int rpgSystemId);
+        bool CreateRpgSystem(RpgSystem rpgSystem);
+        bool Save();
     }
 }

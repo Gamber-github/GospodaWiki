@@ -32,5 +32,20 @@ namespace GospodaWiki.Repository
         {
             return _context.Characters.Any(p => p.Id == characterId);
         }
+        public bool CreateCharacter(Character character)
+        {
+            if (character == null)
+            {
+                throw new ArgumentNullException(nameof(character));
+            }
+
+            _context.Characters.Add(character);
+            return Save();
+        }
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved >= 0;
+        }
     }
 }

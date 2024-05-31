@@ -10,7 +10,12 @@ namespace GospodaWiki.Helper
         {
             CreateMap<Character, CharacterDto>();
             CreateMap<RpgSystem, RpgSystemDto>();
+            CreateMap<RpgSystemDto, RpgSystem>();
             CreateMap<User, UserDto>();
+            CreateMap<Event, EventDto>();
+            CreateMap<EventDto, Event>();
+            CreateMap<Player, PlayerDto>();
+            CreateMap<PlayerDto, Player>();
         }
     }
 }

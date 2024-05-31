@@ -18,6 +18,12 @@ namespace GospodaWiki.Data
         public DbSet<RpgSystem> RpgSystems { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<City> Cities { get; set; } 
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<Player> Players { get; set; }
+        public DbSet<PlayerSeries> PlayerSeries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +48,17 @@ namespace GospodaWiki.Data
                 .HasOne(e => e.Equipment)
                 .WithMany(ce => ce.CharacterEquipments)
                 .HasForeignKey(a => a.EquipmentId);
+
+            modelBuilder.Entity<PlayerSeries>()
+                .HasKey(ps => new { ps.PlayerId, ps.SeriesId });
+            modelBuilder.Entity<PlayerSeries>()
+                .HasOne(p => p.Player)
+                .WithMany(ps => ps.PlayerSeries)
+                .HasForeignKey(p => p.PlayerId);
+            modelBuilder.Entity<PlayerSeries>()
+                .HasOne(s => s.Series)
+                .WithMany(ps => ps.PlayerSeries)
+                .HasForeignKey(s => s.SeriesId);
         }
     }
 }
