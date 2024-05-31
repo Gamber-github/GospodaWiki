@@ -2,7 +2,7 @@
 
 namespace GospodaWiki.Interfaces
 {
-    public interface ICharacterRepository
+    public interface ICharacterInterface
     {
         ICollection<Character> GetCharacters();
         Character GetCharacter(int id);
