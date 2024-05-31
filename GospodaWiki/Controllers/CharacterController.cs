@@ -10,9 +10,9 @@ namespace GospodaWiki.Controllers
     [ApiController]
     public class CharacterController : Controller
     {
-        private readonly ICharacterRepository _characterRepository;
+        private readonly ICharacterInterface _characterRepository;
         private readonly IMapper _mapper;
-        public CharacterController(ICharacterRepository characterRepository, IMapper mapper)
+        public CharacterController(ICharacterInterface characterRepository, IMapper mapper)
         {
             _characterRepository = characterRepository;
             _mapper = mapper;

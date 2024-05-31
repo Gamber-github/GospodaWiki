@@ -9,6 +9,8 @@ namespace GospodaWiki.Helper
         public MappingProfiles()
         {
             CreateMap<Character, CharacterDto>();
+            CreateMap<RpgSystem, RpgSystemDto>();
+            CreateMap<User, UserDto>();
         }
     }
 }

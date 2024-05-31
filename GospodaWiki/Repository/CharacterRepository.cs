@@ -4,7 +4,7 @@ using GospodaWiki.Models;
 
 namespace GospodaWiki.Repository
 {
-    public class CharacterRepository : ICharacterRepository
+    public class CharacterRepository : ICharacterInterface
     {
         private readonly DataContext _context;
         public CharacterRepository(DataContext context)
@@ -32,7 +32,5 @@ namespace GospodaWiki.Repository
         {
             return _context.Characters.Any(p => p.Id == characterId);
         }
-
-
     }
 }
