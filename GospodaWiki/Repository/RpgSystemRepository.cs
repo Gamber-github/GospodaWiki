@@ -34,6 +34,20 @@ namespace GospodaWiki.Repository
         {
             return _context.RpgSystems.Any(p => p.Id == rpgSystemId);
         }
+        public bool CreateRpgSystem(RpgSystem rpgSystem)
+        {
+            if (rpgSystem == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystem));
+            }
 
+            _context.RpgSystems.Add(rpgSystem);
+            return Save();
+        }
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved >= 0;
+        }
     }
 }

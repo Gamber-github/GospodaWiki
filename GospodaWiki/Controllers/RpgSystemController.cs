@@ -32,7 +32,7 @@ namespace GospodaWiki.Controllers
         [ProducesResponseType(200, Type = typeof(RpgSystem))]
         [ProducesResponseType(400)]
 
-        public IActionResult getRpgSystem(int rpgSystemId)
+        public IActionResult GetRpgSystem(int rpgSystemId)
         {
             if (!_rpgSystemRepository.RpgSystemExists(rpgSystemId))
             {
@@ -46,6 +46,38 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
             return Ok(rpgSystem);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+
+        public IActionResult CreateRpgSystem([FromBody] RpgSystemDto rpgSystemCreate)
+        {
+            if (rpgSystemCreate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var rpgSystem = _rpgSystemRepository.GetRpgSystems()
+                .Where(r => r.Name.Trim().ToUpper() == rpgSystemCreate.Name.Trim().ToUpper())
+                .FirstOrDefault();
+
+            if (rpgSystem != null)
+            {
+                ModelState.AddModelError("", $"RpgSystem {rpgSystemCreate.Name} already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            var rpgSystemMap = _mapper.Map<RpgSystem>(rpgSystemCreate);
+
+            if (!_rpgSystemRepository.CreateRpgSystem(rpgSystemMap))
+            {
+                ModelState.AddModelError("", $"Something went wrong saving the {rpgSystemCreate.Name} system.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully created.");
         }
     }
 }

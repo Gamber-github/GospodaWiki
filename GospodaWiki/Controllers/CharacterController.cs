@@ -33,7 +33,7 @@ namespace GospodaWiki.Controllers
         [HttpGet("{characterId}")]
         [ProducesResponseType(200, Type = typeof(Character))]
         [ProducesResponseType(400)]
-        public IActionResult getCharacter(int characterId)
+        public IActionResult GetCharacter(int characterId)
         {
             if (!_characterRepository.CharacterExists(characterId))
             {
@@ -48,7 +48,28 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok(character);
-        }    
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateCharacter([FromBody] Character characterCreate)
+        {
+            if (characterCreate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var characterMap = _mapper.Map<Character>(characterCreate);
+
+            if (!_characterRepository.CreateCharacter(characterMap))
+            {
+                ModelState.AddModelError("", $"Something went wrong saving the character {characterCreate.FirstName} {characterCreate.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully Created");
+        }
     }
 }
  
