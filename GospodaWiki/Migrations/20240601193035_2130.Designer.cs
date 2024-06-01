@@ -4,6 +4,7 @@ using GospodaWiki.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GospodaWiki.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240601193035_2130")]
+    partial class _2130
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -156,6 +159,10 @@ namespace GospodaWiki.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Place")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tags")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -322,9 +329,6 @@ namespace GospodaWiki.Migrations
                     b.Property<int?>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EquipmentId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("EventId")
                         .HasColumnType("int");
 
@@ -344,8 +348,6 @@ namespace GospodaWiki.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CharacterId");
-
-                    b.HasIndex("EquipmentId");
 
                     b.HasIndex("EventId");
 
@@ -475,10 +477,6 @@ namespace GospodaWiki.Migrations
                         .WithMany("Tags")
                         .HasForeignKey("CharacterId");
 
-                    b.HasOne("GospodaWiki.Models.Equipment", null)
-                        .WithMany("Tags")
-                        .HasForeignKey("EquipmentId");
-
                     b.HasOne("GospodaWiki.Models.Event", null)
                         .WithMany("Tags")
                         .HasForeignKey("EventId");
@@ -513,8 +511,6 @@ namespace GospodaWiki.Migrations
             modelBuilder.Entity("GospodaWiki.Models.Equipment", b =>
                 {
                     b.Navigation("CharacterEquipments");
-
-                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Event", b =>

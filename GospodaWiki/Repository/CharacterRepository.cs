@@ -47,5 +47,16 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >= 0;
         }
+
+        public bool UpdateCharacter(Character character)
+        {
+            if (character == null)
+            {
+                throw new ArgumentNullException(nameof(character));
+            }
+
+            _context.Characters.Update(character);
+            return Save();
+        }
     }
 }

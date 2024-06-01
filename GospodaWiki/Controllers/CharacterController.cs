@@ -3,10 +3,11 @@ using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using AutoMapper;
 using GospodaWiki.Dto;
+using GospodaWiki.Repository;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class CharacterController : Controller
     {
@@ -40,7 +41,7 @@ namespace GospodaWiki.Controllers
                 return NotFound();
             }
 
-            var character = _mapper.Map<List<CharacterDto>>(_characterRepository.GetCharacter(characterId));
+            var character = _mapper.Map<List<Character>>(_characterRepository.GetCharacter(characterId));
 
             if (!ModelState.IsValid)
             {
@@ -51,13 +52,28 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(204)]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public IActionResult CreateCharacter([FromBody] Character characterCreate)
+        public IActionResult CreateCharacter([FromBody] CharacterDto characterCreate)
         {
             if (characterCreate == null)
             {
                 return BadRequest(ModelState);
+            }
+
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var character = _characterRepository.GetCharacters()
+                .Where(c => c.FirstName.Trim().ToLower() == characterCreate.FirstName.Trim().ToLower() && c.LastName.Trim().ToLower() == characterCreate.LastName.Trim().ToLower())
+                .FirstOrDefault();
+
+            if (character != null)
+            {
+                ModelState.AddModelError("", $"Character {characterCreate.FirstName} {characterCreate.LastName} already exists.");
+                return StatusCode(422, ModelState);
             }
 
             var characterMap = _mapper.Map<Character>(characterCreate);
@@ -69,6 +85,43 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok("Succesfully Created");
+        }
+
+        [HttpPut("{characterId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public IActionResult UpdateCharacter(int characterId, [FromBody] CharacterDto characterUpdate)
+        {
+            if (characterUpdate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (characterId != characterUpdate.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!_characterRepository.CharacterExists(characterId))
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var characterMap = _mapper.Map<Character>(characterUpdate);
+
+            if (!_characterRepository.UpdateCharacter(characterMap))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating the character {characterUpdate.FirstName} {characterUpdate.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully Updated");
         }
     }
 }

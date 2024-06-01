@@ -9,6 +9,7 @@ namespace GospodaWiki.Interfaces
         Character GetCharcater(string name);
         bool CharacterExists(int characterId);
         bool CreateCharacter(Character character);
+        bool UpdateCharacter(Character character);
         bool Save();
     }
 }

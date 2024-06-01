@@ -15,7 +15,7 @@ namespace GospodaWiki.Repository
 
         public ICollection<RpgSystem> GetRpgSystems()
         {
-            return _context.RpgSystems.OrderBy(p => p.Id).ToList();
+            return _context.RpgSystems.ToList();
         }
         public RpgSystem GetRpgSystem(int id)
         {
@@ -48,6 +48,26 @@ namespace GospodaWiki.Repository
         {
             var saved = _context.SaveChanges();
             return saved >= 0;
+        }
+        public bool UpdateRpgSystem(RpgSystem rpgSystem)
+        {
+            if (rpgSystem == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystem));
+            }
+
+            _context.RpgSystems.Update(rpgSystem);
+            return Save();
+        }
+        public bool DeleteRpgSystem(RpgSystem rpgSystem)
+        {
+            if (rpgSystem == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystem));
+            }
+
+            _context.RpgSystems.Remove(rpgSystem);
+            return Save();
         }
     }
 }

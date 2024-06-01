@@ -15,6 +15,8 @@ builder.Services.AddScoped<IRpgSystemInterface, RpgSystemRepository>();
 builder.Services.AddScoped<IUserInterface, UserRepository>();
 builder.Services.AddScoped<IEventInterface, EventRepository>();
 builder.Services.AddScoped<IPlayerInterface, PlayerRepository>();
+builder.Services.AddScoped<ILocationInterface, LocationRepository>();
+builder.Services.AddScoped<IAbilityInterface, AbilitiesRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>(options =>

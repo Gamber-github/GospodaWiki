@@ -1,6 +1,6 @@
-﻿namespace GospodaWiki.Models
+﻿namespace GospodaWiki.Dto
 {
-    public class Location
+    public class LocationDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = null!;

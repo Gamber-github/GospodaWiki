@@ -53,5 +53,27 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >= 0;
         }
+
+        public bool UpdateEvent(Event @event)
+        {
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
+            _context.Events.Update(@event);
+            return Save();
+        }
+
+        public bool DeleteEvent(Event @event)
+        {
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
+            _context.Events.Remove(@event);
+            return Save();
+        }
     }
 }

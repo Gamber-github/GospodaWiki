@@ -12,7 +12,5 @@ namespace GospodaWiki.Dto
         public string Biography { get; set; } = null!;
         public string City { get; set; } = null!;
         public string Country { get; set; } = null!;
-        public ICollection<Tag> Tags { get; set; } = [];
-        public RpgSystem RpgSystem { get; set; } = null!;
     }
 }
