@@ -20,7 +20,7 @@ namespace GospodaWiki.Repository
         }
         public Location GetLocation(int locationId)
         {
-            return _context.Locations.Where(l => l.Id == locationId).FirstOrDefault();
+            return _context.Locations.Where(l => l.LocationId == locationId).FirstOrDefault();
         }
         public Location GetLocation(string locationName)
         {
@@ -33,7 +33,7 @@ namespace GospodaWiki.Repository
         }
         public bool LocationExists(int locationId)
         {
-            return _context.Locations.Any(l => l.Id == locationId);
+            return _context.Locations.Any(l => l.LocationId == locationId);
         }
         public bool CreateLocation(Location location)
         {

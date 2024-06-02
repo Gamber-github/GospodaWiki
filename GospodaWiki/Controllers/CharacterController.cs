@@ -3,11 +3,14 @@ using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using AutoMapper;
 using GospodaWiki.Dto;
-using GospodaWiki.Repository;
+using GospodaWiki.Helper;
+using Azure;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("v1/[controller]")]
+    [Route("v1")]
     [ApiController]
     public class CharacterController : Controller
     {
@@ -19,19 +22,22 @@ namespace GospodaWiki.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet("Characters")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Character>))]
         public IActionResult GetChatacters()
         {             
-            var characters = _mapper.Map<List<CharacterDto>>(_characterRepository.GetCharacters());
+            var characters = _mapper.Map<List<Character>>(_characterRepository.GetCharacters());
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(characters);
+
+            var json = SerializeObject(characters);
+
+            return Ok(json);
         }
 
-        [HttpGet("{characterId}")]
+        [HttpGet("Character/{characterId}")]
         [ProducesResponseType(200, Type = typeof(Character))]
         [ProducesResponseType(400)]
         public IActionResult GetCharacter(int characterId)
@@ -41,17 +47,31 @@ namespace GospodaWiki.Controllers
                 return NotFound();
             }
 
-            var character = _mapper.Map<List<Character>>(_characterRepository.GetCharacter(characterId));
+            var character = _mapper.Map<Character>(_characterRepository.GetCharacter(characterId));
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok(character);
+            var json = SerializeObject(character);
+
+            return Ok(json);
         }
 
-        [HttpPost]
+        private object SerializeObject(object obj)
+        {
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions
+            {
+                IgnoreNullValues = true,
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
+
+            return json;
+        }
+
+        [HttpPost("Character")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         public IActionResult CreateCharacter([FromBody] CharacterDto characterCreate)
@@ -87,7 +107,7 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully Created");
         }
 
-        [HttpPut("{characterId}")]
+        [HttpPut("Character/{characterId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -98,7 +118,7 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (characterId != characterUpdate.Id)
+            if (characterId != characterUpdate.CharacterId)
             {
                 return BadRequest(ModelState);
             }

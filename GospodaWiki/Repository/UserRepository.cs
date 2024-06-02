@@ -14,11 +14,11 @@ namespace GospodaWiki.Repository
         }
         public User GetUser(int id)
         {
-            return _context.Users.Where(p => p.Id == id).FirstOrDefault();
+            return _context.Users.Where(p => p.UserId == id).FirstOrDefault();
         }
         public bool UserExists(int userId)
         {
-            return _context.Users.Any(p => p.Id == userId);
+            return _context.Users.Any(p => p.UserId == userId);
         }
     }
 }

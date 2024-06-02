@@ -20,7 +20,7 @@ namespace GospodaWiki.Repository
 
         public Ability GetAbility(int id)
         {
-            return _context.Abilities.Where(p => p.Id == id).FirstOrDefault();
+            return _context.Abilities.Where(p => p.AbilityId == id).FirstOrDefault();
         }
 
         public Ability GetAbility(string name)
@@ -30,7 +30,7 @@ namespace GospodaWiki.Repository
 
         public bool AbilityExists(int abilityId)
         {
-            return _context.Abilities.Any(a => a.Id == abilityId);
+            return _context.Abilities.Any(a => a.AbilityId == abilityId);
         }
 
         public bool CreateAbility(Ability ability)

@@ -28,6 +28,9 @@ namespace GospodaWiki.Helper
 
             CreateMap<Ability, AbilityDto>();
             CreateMap<AbilityDto, Ability>();
+
+            CreateMap<Country, CountryDto>();
+            CreateMap<CountryDto, Country>();
         }
     }
 }

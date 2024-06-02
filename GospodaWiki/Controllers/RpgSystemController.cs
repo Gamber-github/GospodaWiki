@@ -101,7 +101,7 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (rpgSystemId != rpgSystemUpdate.Id)
+            if (rpgSystemId != rpgSystemUpdate.RpgSystemId)
             {
                 return BadRequest(ModelState);
             }

@@ -2,10 +2,10 @@
 {
     public class Ability
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string Description { get; set; } = null!;
-        public string Type { get; set; } = null!;
-        public ICollection<CharacterAbility> CharacterAbilities { get; set; } = [];
+        public int AbilityId { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? Type { get; set; }
+        public ICollection<Character>? Characters { get; set; }
     }
 }

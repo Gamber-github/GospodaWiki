@@ -19,7 +19,7 @@ namespace GospodaWiki.Repository
         }
         public RpgSystem GetRpgSystem(int id)
         {
-            return _context.RpgSystems.Where(p => p.Id == id).FirstOrDefault();
+            return _context.RpgSystems.Where(p => p.RpgSystemId == id).FirstOrDefault();
         }   
         public RpgSystem GetRpgSystem(string name)
         {
@@ -32,7 +32,7 @@ namespace GospodaWiki.Repository
         }
         public bool RpgSystemExists(int rpgSystemId)
         {
-            return _context.RpgSystems.Any(p => p.Id == rpgSystemId);
+            return _context.RpgSystems.Any(p => p.RpgSystemId == rpgSystemId);
         }
         public bool CreateRpgSystem(RpgSystem rpgSystem)
         {

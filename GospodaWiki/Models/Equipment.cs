@@ -2,12 +2,12 @@
 {
     public class Equipment
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string Description { get; set; } = null!;
-        public string Type { get; set; } = null!;
-        public string Place { get; set; } = null!;
-        public ICollection<Tag> Tags { get; set; } = [];
-        public ICollection<CharacterEquipment> CharacterEquipments { get; set; } = [];
+        public int EquipmentId { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? Type { get; set; }
+        public string? Place { get; set; }
+        public ICollection<Character>? Characters { get; set; }
+        public ICollection<Tag>? Tags { get; set; }
     }
 }
