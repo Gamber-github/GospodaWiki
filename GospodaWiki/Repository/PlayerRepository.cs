@@ -15,12 +15,12 @@ namespace GospodaWiki.Repository
 
         public ICollection<Player> GetPlayers()
         {
-            return _context.Players.OrderBy(p => p.Id).ToList();
+            return _context.Players.OrderBy(p => p.PlayerId).ToList();
         }
 
         public Player GetPlayer(int id)
         {
-            return _context.Players.FirstOrDefault(p => p.Id == id);
+            return _context.Players.FirstOrDefault(p => p.PlayerId == id);
         }
         public Player GetPlayer(string name)
         {
@@ -29,7 +29,7 @@ namespace GospodaWiki.Repository
 
         public bool PlayerExists(int playerId)
         {
-            return _context.Players.Any(p => p.Id == playerId);
+            return _context.Players.Any(p => p.PlayerId == playerId);
         }
 
         public bool CreatePlayer(Player player)

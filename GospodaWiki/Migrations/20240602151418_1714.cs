@@ -5,7 +5,7 @@
 namespace GospodaWiki.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreation : Migration
+    public partial class _1714 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -1,6 +1,8 @@
 ﻿using GospodaWiki.Data;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using GospodaWiki.Dto;
+using AutoMapper.QueryableExtensions;
 
 namespace GospodaWiki.Repository
 {
@@ -13,24 +15,19 @@ namespace GospodaWiki.Repository
         }
         public ICollection<Character> GetCharacters()
         {
-            return _context.Characters.OrderBy(p => p.Id).ToList();
+                return _context.Characters.ToList();
         }
         public Character GetCharacter(int id)
         {
-            return _context.Characters.Where(p => p.Id == id).FirstOrDefault();
-        } 
-        public Character GetCharcater(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException("Name cannot be empty or null.");
-            }
+            var query = _context.Characters
+                .Where(p => p.CharacterId == id);
+                //.ProjectTo<CharacterDto>();
 
-            return _context.Characters.FirstOrDefault(c => $"{c.FirstName} {c.LastName}" == name);
-        }
+             return query.FirstOrDefault();
+        } 
         public bool CharacterExists(int characterId)
         {
-            return _context.Characters.Any(p => p.Id == characterId);
+            return _context.Characters.Any(p => p.CharacterId == characterId);
         }
         public bool CreateCharacter(Character character)
         {
@@ -46,6 +43,17 @@ namespace GospodaWiki.Repository
         {
             var saved = _context.SaveChanges();
             return saved >= 0;
+        }
+
+        public bool UpdateCharacter(Character character)
+        {
+            if (character == null)
+            {
+                throw new ArgumentNullException(nameof(character));
+            }
+
+            _context.Characters.Update(character);
+            return Save();
         }
     }
 }

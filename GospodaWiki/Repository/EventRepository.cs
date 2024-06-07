@@ -14,12 +14,12 @@ namespace GospodaWiki.Repository
 
         public ICollection<Event> GetEvents()
         {
-            return _context.Events.OrderBy(p => p.Id).ToList();
+            return _context.Events.OrderBy(p => p.EventId).ToList();
         }
 
         public Event GetEvent(int eventId)
         {
-            return _context.Events.FirstOrDefault(p => p.Id == eventId);
+            return _context.Events.FirstOrDefault(p => p.EventId == eventId);
         }
 
         public Event GetEvent(string name)
@@ -34,7 +34,7 @@ namespace GospodaWiki.Repository
 
         public bool EventExists(int eventId)
         {
-            return _context.Events.Any(p => p.Id == eventId);
+            return _context.Events.Any(p => p.EventId == eventId);
         }
 
         public bool CreateEvent(Event @event)
@@ -52,6 +52,28 @@ namespace GospodaWiki.Repository
         {
             var saved = _context.SaveChanges();
             return saved >= 0;
+        }
+
+        public bool UpdateEvent(Event @event)
+        {
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
+            _context.Events.Update(@event);
+            return Save();
+        }
+
+        public bool DeleteEvent(Event @event)
+        {
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
+            _context.Events.Remove(@event);
+            return Save();
         }
     }
 }

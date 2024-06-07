@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class PlayerController : Controller
     {

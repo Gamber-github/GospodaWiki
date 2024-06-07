@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class EventController : Controller
     {
@@ -53,7 +53,7 @@ namespace GospodaWiki.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateEvent([FromBody] Event eventCreate)
+        public IActionResult CreateEvent([FromBody] EventDto eventCreate)
         {
             if (eventCreate == null)
             {
@@ -69,6 +69,43 @@ namespace GospodaWiki.Controllers
 
             return Ok("Successfully created");
 
+        }
+
+        [HttpPut("{eventId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateEvent(int eventId, [FromBody] EventDto eventUpdate)
+        {
+            if (eventUpdate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if(eventId != eventUpdate.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if(!_eventRepository.EventExists(eventId))
+            {
+                return NotFound();
+            }
+
+            var eventMap = _mapper.Map<Event>(eventUpdate);
+
+            if(!_eventRepository.UpdateEvent(eventMap))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating the event {eventMap.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully updated");
         }
     }
 }

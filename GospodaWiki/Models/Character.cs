@@ -2,17 +2,19 @@
 {
     public class Character
     {
-        public int Id { get; set; }
-        public string FirstName { get; set; } = null!;
-        public string LastName { get; set; } = null!;
-        public int Age { get; set; }
-        public DateTime Birthday { get; set; }
-        public string Biography { get; set; } = null!;
-        public City City { get; set; } = null!;
-        public Country Country { get; set; } = null!;
-        public ICollection<Tag> Tags { get; set; } = [];
-        public RpgSystem RpgSystem { get; set; } = null!;
-        public ICollection<CharacterAbility> CharacterAbilities { get; set; }
-        public ICollection<CharacterEquipment> CharacterEquipments { get; set; }
+        public int CharacterId { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public int? Age { get; set; }
+        public DateTime? Birthday { get; set; }
+        public string? Biography { get; set; }
+        public string? City { get; set; }
+        public int? CountryId { get; set; }
+        public virtual Country? Country { get; set; }
+        public virtual ICollection<Tag>? Tags { get; set; }
+        public int? RpgSystemId { get; set; }
+        public virtual RpgSystem? RpgSystem { get; set; }
+        public virtual ICollection<Ability>? Abilities { get; set; }
+        public virtual ICollection<Equipment>? Equipments { get; set; }
     }
 }

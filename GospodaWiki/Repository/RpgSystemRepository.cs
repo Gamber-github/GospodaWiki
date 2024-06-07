@@ -15,11 +15,11 @@ namespace GospodaWiki.Repository
 
         public ICollection<RpgSystem> GetRpgSystems()
         {
-            return _context.RpgSystems.OrderBy(p => p.Id).ToList();
+            return _context.RpgSystems.ToList();
         }
         public RpgSystem GetRpgSystem(int id)
         {
-            return _context.RpgSystems.Where(p => p.Id == id).FirstOrDefault();
+            return _context.RpgSystems.Where(p => p.RpgSystemId == id).FirstOrDefault();
         }   
         public RpgSystem GetRpgSystem(string name)
         {
@@ -32,7 +32,7 @@ namespace GospodaWiki.Repository
         }
         public bool RpgSystemExists(int rpgSystemId)
         {
-            return _context.RpgSystems.Any(p => p.Id == rpgSystemId);
+            return _context.RpgSystems.Any(p => p.RpgSystemId == rpgSystemId);
         }
         public bool CreateRpgSystem(RpgSystem rpgSystem)
         {
@@ -48,6 +48,26 @@ namespace GospodaWiki.Repository
         {
             var saved = _context.SaveChanges();
             return saved >= 0;
+        }
+        public bool UpdateRpgSystem(RpgSystem rpgSystem)
+        {
+            if (rpgSystem == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystem));
+            }
+
+            _context.RpgSystems.Update(rpgSystem);
+            return Save();
+        }
+        public bool DeleteRpgSystem(RpgSystem rpgSystem)
+        {
+            if (rpgSystem == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystem));
+            }
+
+            _context.RpgSystems.Remove(rpgSystem);
+            return Save();
         }
     }
 }

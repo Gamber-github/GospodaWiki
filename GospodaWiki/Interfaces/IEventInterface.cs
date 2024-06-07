@@ -9,6 +9,8 @@ namespace GospodaWiki.Interfaces
         Event GetEvent(string name);
         bool EventExists(int eventId);
         bool CreateEvent(Event @event);
+        bool UpdateEvent(Event @event);
+        bool DeleteEvent(Event @event);
         bool Save();
     }
 }
