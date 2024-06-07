@@ -3,14 +3,13 @@ using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using AutoMapper;
 using GospodaWiki.Dto;
-using GospodaWiki.Helper;
-using Azure;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using GospodaWiki.Helper;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("v1")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class CharacterController : Controller
     {
@@ -22,7 +21,7 @@ namespace GospodaWiki.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("Characters")]
+        [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Character>))]
         public IActionResult GetChatacters()
         {             
@@ -32,15 +31,15 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            var json = SerializeObject(characters);
+            var json = SerializeHelper.SerializeObject(characters);
 
             return Ok(json);
         }
 
-        [HttpGet("Character/{characterId}")]
+        [HttpGet("{characterId}")]
         [ProducesResponseType(200, Type = typeof(Character))]
         [ProducesResponseType(400)]
-        public IActionResult GetCharacter(int characterId)
+        public ActionResult<Character> GetCharacter(int characterId)
         {
             if (!_characterRepository.CharacterExists(characterId))
             {
@@ -54,24 +53,10 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            var json = SerializeObject(character);
-
-            return Ok(json);
+            return Ok(character);
         }
 
-        private object SerializeObject(object obj)
-        {
-            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions
-            {
-                IgnoreNullValues = true,
-                WriteIndented = true,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            });
-
-            return json;
-        }
-
-        [HttpPost("Character")]
+        [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         public IActionResult CreateCharacter([FromBody] CharacterDto characterCreate)
@@ -107,7 +92,7 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully Created");
         }
 
-        [HttpPut("Character/{characterId}")]
+        [HttpPatch("{characterId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]

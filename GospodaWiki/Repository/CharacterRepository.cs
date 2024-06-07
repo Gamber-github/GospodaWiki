@@ -2,6 +2,7 @@
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using GospodaWiki.Dto;
+using AutoMapper.QueryableExtensions;
 
 namespace GospodaWiki.Repository
 {
@@ -19,35 +20,8 @@ namespace GospodaWiki.Repository
         public Character GetCharacter(int id)
         {
             var query = _context.Characters
-                .Where(p => p.CharacterId == id)
-                .Select(p => new Character
-                {
-                    CharacterId = p.CharacterId,
-                    FirstName = p.FirstName,
-                    LastName = p.LastName,
-                    Age = p.Age,
-                    Birthday = p.Birthday,
-                    Biography = p.Biography,
-                    City = p.City,
-                    Country = new Country
-                    {
-                        CountryId = p.Country.CountryId,
-                        Name = p.Country.Name,
-                    },
-                    RpgSystem = new RpgSystem
-                    {
-                        RpgSystemId = p.RpgSystem.RpgSystemId,
-                        Name = p.RpgSystem.Name,
-                        Description = p.RpgSystem.Description
-                    },
-                    Abilities = p.Abilities.Select(a => new Ability
-                    {
-                        AbilityId = a.AbilityId,
-                        Name = a.Name,
-                        Description = a.Description,
-                        Type = a.Type
-                    }).ToList()
-                }).ToList();
+                .Where(p => p.CharacterId == id);
+                //.ProjectTo<CharacterDto>();
 
              return query.FirstOrDefault();
         } 

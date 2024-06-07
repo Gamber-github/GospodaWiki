@@ -54,6 +54,7 @@ namespace GospodaWiki.Repository
             {
                 throw new ArgumentNullException(nameof(ability));
             }
+
             _context.Abilities.Add(ability);
             return Save();
         }
@@ -63,6 +64,7 @@ namespace GospodaWiki.Repository
             {
                 throw new ArgumentNullException(nameof(ability));
             }
+
             _context.Abilities.Remove(ability);
             return Save();
         }
