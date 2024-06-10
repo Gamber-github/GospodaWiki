@@ -8,6 +8,7 @@ namespace GospodaWiki.Models
         public ICollection<RpgSystem>? RpgSystems { get; set; }
         public ICollection<Series>? Series { get; set; }
         public ICollection<Event>? Events { get; set; }
-        public ICollection<Equipment>? Equipment { get; set; }
+        public ICollection<Item>? Items { get; set; }
+        public ICollection<Story>? Stories { get; set; }
     }
 }

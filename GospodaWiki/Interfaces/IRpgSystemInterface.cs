@@ -1,16 +1,16 @@
-﻿using GospodaWiki.Models;
+﻿using GospodaWiki.Dto.RpgSystem;
+using GospodaWiki.Models;
 
 namespace GospodaWiki.Interfaces
 {
     public interface IRpgSystemInterface
     {
-        ICollection<RpgSystem> GetRpgSystems();
-        RpgSystem GetRpgSystem(int id);
+        ICollection<RpgSystemsDto> GetRpgSystems();
+        RpgSystemDetailsDto GetRpgSystem(int id);
         RpgSystem GetRpgSystem(string name);
         bool RpgSystemExists(int rpgSystemId);
         bool CreateRpgSystem(RpgSystem rpgSystem);
-        bool UpdateRpgSystem(RpgSystem rpgSystem);
-        bool DeleteRpgSystem(RpgSystem rpgSystem);
+        bool UpdateRpgSystem(PutRpgSystemDto rpgSystem);
         bool Save();
     }
 }

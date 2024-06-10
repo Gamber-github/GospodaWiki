@@ -1,13 +1,14 @@
 ﻿namespace GospodaWiki.Models
 {
-    public class Equipment
+    public class Item
     {
-        public int EquipmentId { get; set; }
+        public int ItemId { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public string? Type { get; set; }
-        public string? Place { get; set; }
+        public string? ImagePath { get; set; }
+        public Image? Image { get; set; }
         public ICollection<Character>? Characters { get; set; }
+        public string? OwnerName { get; set; }
         public ICollection<Tag>? Tags { get; set; }
     }
 }

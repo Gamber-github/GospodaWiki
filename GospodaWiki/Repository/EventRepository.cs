@@ -1,4 +1,5 @@
 ﻿using GospodaWiki.Data;
+using GospodaWiki.Dto.Event;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 
@@ -12,26 +13,60 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<Event> GetEvents()
+        public ICollection<EventsDto> GetEvents()
         {
-            return _context.Events.OrderBy(p => p.EventId).ToList();
-        }
+            var events = _context.Events.ToList();
+            var eventsDto = new List<EventsDto>();
 
-        public Event GetEvent(int eventId)
-        {
-            return _context.Events.FirstOrDefault(p => p.EventId == eventId);
-        }
-
-        public Event GetEvent(string name)
-        {
-            if (string.IsNullOrEmpty(name))
+            foreach (var @event in events)
             {
-                throw new ArgumentException("Name cannot be empty or null.");
+                eventsDto.Add(new EventsDto
+                {
+                    EventId = @event.EventId,
+                    Name = @event.Name,
+                    Description = @event.Description,
+                    EventUrl = @event.EventUrl,
+                    ImagePath = @event.ImagePath,
+                    Date = @event.Date
+                });
             }
 
-            return _context.Events.FirstOrDefault(e => e.Name == name);
+            return eventsDto;
         }
 
+        public EventDetailsDto GetEvent(int eventId)
+        {
+            var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == eventId);
+
+            if (@eventContext == null)
+            {
+                throw new ArgumentNullException(nameof(@eventContext));
+            }
+
+            var location = _context.Locations.FirstOrDefault(l => l.LocationId == @eventContext.LocationId);
+            var tags = _context.Tags.Where(t => t.Events.Any(e => e.EventId == @eventContext.EventId)).Select(t => t.Name).ToList();
+
+            var @eventDto = new EventDetailsDto
+            {
+                EventId = @eventContext.EventId,
+                Name = @eventContext.Name,
+                Description = @eventContext.Description,
+                EventUrl = @eventContext.EventUrl,
+                ImagePath = @eventContext.ImagePath,
+                Date = @eventContext.Date,
+                Location = location != null ? new Location
+                {
+                    LocationId = location.LocationId,
+                    Name = location.Name,
+                    Address = location.Address,
+                    City = location.City,
+                    LocationURL = location.LocationURL
+                } : new Location(),
+                Tags = tags.ToArray()
+            };
+
+            return @eventDto;
+        }
         public bool EventExists(int eventId)
         {
             return _context.Events.Any(p => p.EventId == eventId);

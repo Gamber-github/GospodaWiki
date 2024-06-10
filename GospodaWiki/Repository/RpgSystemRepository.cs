@@ -1,4 +1,5 @@
 ﻿using GospodaWiki.Data;
+using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 
@@ -13,13 +14,43 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<RpgSystem> GetRpgSystems()
+        public ICollection<RpgSystemsDto> GetRpgSystems()
         {
-            return _context.RpgSystems.ToList();
+            var rpgSystems = _context.RpgSystems.ToList();
+            var rpgSystemsDto = new List<RpgSystemsDto>();
+
+            foreach (var rpgSystem in rpgSystems)
+            {
+                rpgSystemsDto.Add(new RpgSystemsDto
+                {
+                    RpgSystemId = rpgSystem.RpgSystemId,
+                    Name = rpgSystem.Name
+                });
+            }
+
+            return rpgSystemsDto;
         }
-        public RpgSystem GetRpgSystem(int id)
+        public RpgSystemDetailsDto GetRpgSystem(int id)
         {
-            return _context.RpgSystems.Where(p => p.RpgSystemId == id).FirstOrDefault();
+            var rpgSystem = _context.RpgSystems.FirstOrDefault(c => c.RpgSystemId == id);
+            var story = _context.Stories.FirstOrDefault(s => s.RpgSystemId == rpgSystem.RpgSystemId);
+            var tags = _context.Tags.Where(t => t.RpgSystems.Any(r => r.RpgSystemId == rpgSystem.RpgSystemId)).Select(t => t.Name).ToList();
+            var characters = _context.Characters.Where(c => c.RpgSystemId == rpgSystem.RpgSystemId).Select(c => c.FirstName + " " + c.LastName).ToList();
+            var series = _context.Series.Where(s => s.RpgSystemId == rpgSystem.RpgSystemId).Select(s => s.Name).ToList();
+            
+            var rpgSystemDetailsDto = new RpgSystemDetailsDto
+            {
+                RpgSystemId = rpgSystem.RpgSystemId,
+                Name = rpgSystem.Name,
+                Description = rpgSystem.Description,
+                StoryName = story?.Name,
+                ImagePath = rpgSystem.ImagePath,
+                Characters = characters.ToArray(),
+                Series = series.ToArray(),
+                Tags = tags.ToArray()
+            };
+
+            return rpgSystemDetailsDto;
         }   
         public RpgSystem GetRpgSystem(string name)
         {
@@ -49,14 +80,27 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >= 0;
         }
-        public bool UpdateRpgSystem(RpgSystem rpgSystem)
+        public bool UpdateRpgSystem(PutRpgSystemDto rpgSystem)
         {
             if (rpgSystem == null)
             {
                 throw new ArgumentNullException(nameof(rpgSystem));
             }
 
-            _context.RpgSystems.Update(rpgSystem);
+            var rpgSystemContext = _context.RpgSystems.FirstOrDefault(c => c.RpgSystemId == rpgSystem.RpgSystemId);
+            
+            if (rpgSystemContext == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystem));
+            }
+
+            rpgSystemContext.RpgSystemId = rpgSystem.RpgSystemId;
+            rpgSystemContext.Name = rpgSystem.Name;
+            rpgSystemContext.Description = rpgSystem.Description;
+            rpgSystemContext.ImagePath = rpgSystem.ImagePath;
+            rpgSystemContext.StoryName = rpgSystem.StoryName;
+
+            _context.RpgSystems.Update(rpgSystemContext); 
             return Save();
         }
         public bool DeleteRpgSystem(RpgSystem rpgSystem)

@@ -1,12 +1,10 @@
-﻿namespace GospodaWiki.Models
+﻿namespace GospodaWiki.Dto.Location
 {
-    public class Location
+    public class PostLocationDto
     {
-        public int LocationId { get; set; }
         public string? Name { get; set; }
         public string? Address { get; set; }
         public string? City { get; set; }
         public string? LocationURL { get; set; }
-        public ICollection<Event>? Events { get; set; }
     }
 }

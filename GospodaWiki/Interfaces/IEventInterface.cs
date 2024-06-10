@@ -1,16 +1,15 @@
-﻿using GospodaWiki.Models;
+﻿using GospodaWiki.Dto.Event;
+using GospodaWiki.Models;
 
 namespace GospodaWiki.Interfaces
 {
     public interface IEventInterface
     {
-        ICollection<Event> GetEvents();
-        Event GetEvent(int eventId);
-        Event GetEvent(string name);
+        ICollection<EventsDto> GetEvents();
+        EventDetailsDto GetEvent(int eventId);
         bool EventExists(int eventId);
         bool CreateEvent(Event @event);
         bool UpdateEvent(Event @event);
-        bool DeleteEvent(Event @event);
         bool Save();
     }
 }
