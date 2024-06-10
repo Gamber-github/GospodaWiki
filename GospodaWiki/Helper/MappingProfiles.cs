@@ -1,5 +1,10 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto;
+using GospodaWiki.Dto.Character;
+using GospodaWiki.Dto.Event;
+using GospodaWiki.Dto.Location;
+using GospodaWiki.Dto.RpgSystem;
+using GospodaWiki.Dto.Series;
 using GospodaWiki.Models;
 
 namespace GospodaWiki.Helper
@@ -8,29 +13,39 @@ namespace GospodaWiki.Helper
     {
         public MappingProfiles()
         {
-            CreateMap<Character, CharacterDto>();
-            CreateMap<CharacterDto, Character>();
+            CreateMap<Character, CharacterDetailsDto>();
+            CreateMap<CharacterDetailsDto, Character>();
 
-            CreateMap<RpgSystem, RpgSystemDto>();
-            CreateMap<RpgSystemDto, RpgSystem>();
+            CreateMap<CharactersDto, Character>();
+            CreateMap<Character, CharactersDto>();
+            CreateMap<PostCharacterDto, Character>();
 
-            CreateMap<User, UserDto>();
-            CreateMap<UserDto, User>();
+            CreateMap<PostCharacterDto, Character>();
 
-            CreateMap<Event, EventDto>();
-            CreateMap<EventDto, Event>();
+            CreateMap<RpgSystem, RpgSystemsDto>();
+            CreateMap<RpgSystemsDto, RpgSystem>();
+
+            CreateMap<PostRpgSystemDto, RpgSystem>();
+            CreateMap<RpgSystemDetailsDto, RpgSystem>();
+            CreateMap<PatchRpgSystemDto, RpgSystem>();
+
+            CreateMap<EventDetailsDto, Event>();
+            CreateMap<EventsDto, Event>();
+            CreateMap<PostEventDto, Event>();
+            CreateMap<PatchEventDto, Event>();
 
             CreateMap<Player, PlayerDto>();
             CreateMap<PlayerDto, Player>();
 
-            CreateMap<Location, LocationDto>();
-            CreateMap<LocationDto, Location>();
+            CreateMap<Location, LocationDetailsDto>();
+            CreateMap<LocationDetailsDto, Location>();
+            CreateMap<PostLocationDto, Location>();
+            CreateMap<PatchLocationDto, Location>();
 
-            CreateMap<Ability, AbilityDto>();
-            CreateMap<AbilityDto, Ability>();
-
-            CreateMap<Country, CountryDto>();
-            CreateMap<CountryDto, Country>();
+            CreateMap<Series, SeriesDto>();
+            CreateMap<SeriesDto, Series>();
+            CreateMap<SeriesDetailsDto, Series>();
+            CreateMap<PostSeriesDto, Series>();
         }
     }
 }

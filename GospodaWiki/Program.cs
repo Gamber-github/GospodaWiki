@@ -8,16 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<ICharacterInterface, CharacterRepository>();
 builder.Services.AddScoped<IRpgSystemInterface, RpgSystemRepository>();
-builder.Services.AddScoped<IUserInterface, UserRepository>();
 builder.Services.AddScoped<IEventInterface, EventRepository>();
 builder.Services.AddScoped<IPlayerInterface, PlayerRepository>();
 builder.Services.AddScoped<ILocationInterface, LocationRepository>();
-builder.Services.AddScoped<IAbilityInterface, AbilitiesRepository>();
+builder.Services.AddScoped<ISeriesInterface, SeriesRepository>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>(options =>

@@ -1,4 +1,5 @@
 ﻿using GospodaWiki.Data;
+using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 
@@ -13,14 +14,44 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<RpgSystem> GetRpgSystems()
+        public ICollection<RpgSystemsDto> GetRpgSystems()
         {
-            return _context.RpgSystems.ToList();
+            var rpgSystems = _context.RpgSystems.ToList();
+            var rpgSystemsDto = new List<RpgSystemsDto>();
+
+            foreach (var rpgSystem in rpgSystems)
+            {
+                rpgSystemsDto.Add(new RpgSystemsDto
+                {
+                    RpgSystemId = rpgSystem.RpgSystemId,
+                    Name = rpgSystem.Name
+                });
+            }
+
+            return rpgSystemsDto;
         }
-        public RpgSystem GetRpgSystem(int id)
+        public RpgSystemDetailsDto GetRpgSystem(int id)
         {
-            return _context.RpgSystems.Where(p => p.RpgSystemId == id).FirstOrDefault();
-        }   
+            var rpgSystemContext = _context.RpgSystems.FirstOrDefault(c => c.RpgSystemId == id);
+            var story = _context.Stories.FirstOrDefault(s => s.RpgSystemId == rpgSystemContext.RpgSystemId);
+            var tags = _context.Tags.Where(t => t.RpgSystems.Any(r => r.RpgSystemId == rpgSystemContext.RpgSystemId)).Select(t => t.Name);
+            var characters = _context.Characters.Where(c => c.RpgSystemId == rpgSystemContext.RpgSystemId).Select(c => c.FirstName + " " + c.LastName).ToList();
+            var series = _context.Series.Where(s => s.RpgSystemId == rpgSystemContext.RpgSystemId).Select(s => s.Name).ToList();
+
+            var rpgSystemDetailsDto = new RpgSystemDetailsDto
+            {
+                RpgSystemId = rpgSystemContext.RpgSystemId,
+                Name = rpgSystemContext.Name,
+                Description = rpgSystemContext.Description,
+                StoryName = story?.Name,
+                ImagePath = rpgSystemContext.ImagePath,
+                Characters = characters.ToArray(),
+                Series = series.ToList(),
+                Tags = tags.ToList()
+            };
+
+            return rpgSystemDetailsDto;
+        }
         public RpgSystem GetRpgSystem(string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -34,14 +65,21 @@ namespace GospodaWiki.Repository
         {
             return _context.RpgSystems.Any(p => p.RpgSystemId == rpgSystemId);
         }
-        public bool CreateRpgSystem(RpgSystem rpgSystem)
+        public bool CreateRpgSystem(PostRpgSystemDto rpgSystem)
         {
             if (rpgSystem == null)
             {
                 throw new ArgumentNullException(nameof(rpgSystem));
             }
 
-            _context.RpgSystems.Add(rpgSystem);
+            var rpgSystemDto = new RpgSystem
+            {
+                Name = rpgSystem.Name,
+                Description = rpgSystem.Description
+            };
+
+
+            _context.RpgSystems.Add(rpgSystemDto);
             return Save();
         }
         public bool Save()
@@ -49,14 +87,30 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >= 0;
         }
-        public bool UpdateRpgSystem(RpgSystem rpgSystem)
+        public bool UpdateRpgSystem(PatchRpgSystemDto rpgSystemUpdate, int rpgSystemId)
         {
-            if (rpgSystem == null)
+            if (rpgSystemUpdate == null)
             {
-                throw new ArgumentNullException(nameof(rpgSystem));
+                throw new ArgumentNullException(nameof(rpgSystemUpdate));
             }
 
-            _context.RpgSystems.Update(rpgSystem);
+            var rpgSystemContext = _context.RpgSystems.FirstOrDefault(c => c.RpgSystemId == rpgSystemId);
+
+            if (rpgSystemContext == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystemUpdate));
+            }
+
+            rpgSystemContext.Name = rpgSystemUpdate.Name ?? rpgSystemContext.Name;
+            rpgSystemContext.Description = rpgSystemUpdate.Description ?? rpgSystemContext.Description;
+            rpgSystemContext.ImagePath = rpgSystemUpdate.ImagePath ?? rpgSystemContext.ImagePath;
+            rpgSystemContext.StoryName = rpgSystemUpdate.StoryName ?? rpgSystemContext.StoryName;
+            rpgSystemContext.Tags = rpgSystemUpdate.TagsIds.Count > 0 ? rpgSystemUpdate.TagsIds.Select(t => new Tag { TagId = t }).ToList() : [];
+            rpgSystemContext.Characters = rpgSystemUpdate.CharactersIds != null ? rpgSystemUpdate.CharactersIds.Select(c => new Character { CharacterId = c }).ToList() : [];
+            rpgSystemContext.Series = rpgSystemUpdate.SeriesIds != null ? rpgSystemUpdate.SeriesIds.Select(s => new Series { SeriesId = s }).ToList() : [];
+
+
+            _context.RpgSystems.Update(rpgSystemContext); 
             return Save();
         }
         public bool DeleteRpgSystem(RpgSystem rpgSystem)

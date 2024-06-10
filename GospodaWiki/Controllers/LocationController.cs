@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using GospodaWiki.Dto;
+using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -20,20 +20,22 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Location>))]
+        [ProducesResponseType(200, Type = typeof(LocationDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetLocations()
         {
-            var locations = _mapper.Map<List<LocationDto>>(_locationRepository.GetLocations());
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
+            var locations = _locationRepository.GetLocations();
+
             return Ok(locations);
         }
 
         [HttpGet("{locationId}")]
-        [ProducesResponseType(200, Type = typeof(Location))]
+        [ProducesResponseType(200, Type = typeof(LocationDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetLocation(int locationId)
         {
@@ -55,7 +57,7 @@ namespace GospodaWiki.Controllers
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public IActionResult CreateLocation([FromBody] LocationDto locationCreate)
+        public IActionResult CreateLocation([FromBody] PostLocationDto locationCreate)
         {
             if (locationCreate == null)
             {
@@ -68,13 +70,14 @@ namespace GospodaWiki.Controllers
             }
 
             var location = _locationRepository.GetLocations().FirstOrDefault(l => l.Name.Trim().ToUpper() == locationCreate.Name.Trim().ToUpper());
+
             if (location != null)
             {
                 ModelState.AddModelError("", $"Location {locationCreate.Name} already exists");
                 return StatusCode(422, ModelState);
             }
 
-            var locationMap = _mapper.Map<Location>(locationCreate);
+            var locationMap = _mapper.Map<PostLocationDto>(locationCreate);
 
             if (!_locationRepository.CreateLocation(locationMap))
             {
@@ -85,10 +88,10 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully Created");
         }
 
-        [HttpPut("{locationId}")]
+        [HttpPatch("{locationId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult UpdateLocation(int locationId, [FromBody] LocationDto locationUpdate)
+        public IActionResult UpdateLocation([FromRoute] int locationId, [FromBody] PatchLocationDto locationUpdate)
         {
             if (locationUpdate == null)
             {
@@ -105,32 +108,11 @@ namespace GospodaWiki.Controllers
                 return NotFound();
             }
 
-            var locationMap = _mapper.Map<Location>(locationUpdate);
+            var locationMap = _mapper.Map<PatchLocationDto>(locationUpdate);
 
-            if (!_locationRepository.UpdateLocation(locationMap))
+            if (!_locationRepository.UpdateLocation(locationMap, locationId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating {locationUpdate.Name}");
-                return StatusCode(500, ModelState);
-            }
-
-            return NoContent();
-        }
-        [HttpDelete("{locationId}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public IActionResult DeleteLocation(int locationId)
-        {
-            if (!_locationRepository.LocationExists(locationId))
-            {
-                return NotFound();
-            }
-
-            var location = _locationRepository.GetLocation(locationId);
-
-            if (!_locationRepository.DeleteLocation(location))
-            {
-                ModelState.AddModelError("", $"Something went wrong deleting location {location.Name}");
                 return StatusCode(500, ModelState);
             }
 

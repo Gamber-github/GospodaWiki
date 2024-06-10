@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GospodaWiki.Data;
+using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 
@@ -14,13 +15,42 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<Location> GetLocations()
+        public ICollection<LocationsDto> GetLocations()
         {
-            return _context.Locations.ToList();
+            var locations = _context.Locations.ToList();
+            var locationsDto = new List<LocationsDto>();
+
+            foreach (var location in locations)
+            {
+                locationsDto.Add(new LocationsDto
+                {
+                    LocationId = location.LocationId,
+                    Name = location.Name,
+                    Address = location.Address,
+                    City = location.City,
+                    LocationURL = location.LocationURL
+                });
+            }
+            
+            return locationsDto;
         }
-        public Location GetLocation(int locationId)
+
+        public LocationDetailsDto GetLocation(int locationId)
         {
-            return _context.Locations.Where(l => l.LocationId == locationId).FirstOrDefault();
+            var Location = _context.Locations.Where(l => l.LocationId == locationId).FirstOrDefault();
+            var Events = _context.Events.Where(e => e.LocationId == locationId).Select(e => e.Name);
+
+            var locationDetailsDto = new LocationDetailsDto
+            {
+                LocationId = Location.LocationId,
+                Name = Location.Name,
+                Address = Location.Address,
+                City = Location.City,
+                LocationURL = Location.LocationURL,
+                Events = Events.ToList()
+            };
+
+            return locationDetailsDto;
         }
         public Location GetLocation(string locationName)
         {
@@ -35,14 +65,22 @@ namespace GospodaWiki.Repository
         {
             return _context.Locations.Any(l => l.LocationId == locationId);
         }
-        public bool CreateLocation(Location location)
+        public bool CreateLocation(PostLocationDto location)
         {
             if(location == null)
             {
                 throw new ArgumentNullException(nameof(location));
             }
 
-            _context.Locations.Add(location);
+            var locationDto = new Location
+            {
+                Name = location.Name,
+                Address = location.Address,
+                City = location.City,
+                LocationURL = location.LocationURL
+            };
+
+            _context.Locations.Add(locationDto);
             return Save();
         }
         public bool Save()
@@ -50,13 +88,28 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >=0;
         }
-        public bool UpdateLocation(Location location)
+        public bool UpdateLocation(PatchLocationDto location, int locationId)
         {
             if(location == null)
             {
                 throw new ArgumentNullException(nameof(location));
             }
-            _context.Locations.Update(location);
+
+            var locationContext = _context.Locations.FirstOrDefault(l => l.LocationId == locationId);
+
+            if(locationContext == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
+            locationContext.Name = location.Name;
+            locationContext.Address = location.Address;
+            locationContext.City = location.City;
+            locationContext.LocationURL = location.LocationURL;
+            locationContext.Events = location.EventId != null ? location.EventId.Select(e => new Event { EventId = e }).ToList() : new List<Event>();
+
+
+            _context.Locations.Update(locationContext);
             return Save();
         }
         public bool DeleteLocation(Location location)

@@ -1,4 +1,5 @@
 ﻿using GospodaWiki.Data;
+using GospodaWiki.Dto.Event;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 
@@ -12,37 +13,82 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<Event> GetEvents()
+        public ICollection<EventsDto> GetEvents()
         {
-            return _context.Events.OrderBy(p => p.EventId).ToList();
-        }
+            var events = _context.Events.ToList();
+            var eventsDto = new List<EventsDto>();
 
-        public Event GetEvent(int eventId)
-        {
-            return _context.Events.FirstOrDefault(p => p.EventId == eventId);
-        }
-
-        public Event GetEvent(string name)
-        {
-            if (string.IsNullOrEmpty(name))
+            foreach (var @event in events)
             {
-                throw new ArgumentException("Name cannot be empty or null.");
+                eventsDto.Add(new EventsDto
+                {
+                    EventId = @event.EventId,
+                    Name = @event.Name,
+                    Description = @event.Description,
+                    EventUrl = @event.EventUrl,
+                    ImagePath = @event.ImagePath,
+                    Date = @event.Date
+                });
             }
 
-            return _context.Events.FirstOrDefault(e => e.Name == name);
+            return eventsDto;
         }
 
+        public EventDetailsDto GetEvent(int eventId)
+        {
+            var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == eventId);
+
+            if (@eventContext == null)
+            {
+                throw new ArgumentNullException(nameof(@eventContext));
+            }
+
+            var location = _context.Locations.FirstOrDefault(l => l.LocationId == @eventContext.LocationId);
+            var tags = _context.Tags.Where(t => t.Events.Any(e => e.EventId == @eventContext.EventId)).Select(t => t.Name).ToList();
+
+            var @eventDto = new EventDetailsDto
+            {
+                EventId = @eventContext.EventId,
+                Name = @eventContext.Name,
+                Description = @eventContext.Description,
+                EventUrl = @eventContext.EventUrl,
+                ImagePath = @eventContext.ImagePath,
+                Date = @eventContext.Date,
+                Location = location != null ? new Location
+                {
+                    LocationId = location.LocationId,
+                    Name = location.Name,
+                    Address = location.Address,
+                    City = location.City,
+                    LocationURL = location.LocationURL
+                } : new Location(),
+                Tags = tags.ToArray()
+            };
+
+            return @eventDto;
+        }
         public bool EventExists(int eventId)
         {
             return _context.Events.Any(p => p.EventId == eventId);
         }
 
-        public bool CreateEvent(Event @event)
+        public bool CreateEvent(PostEventDto @eventCreate)
         {
-            if (@event == null)
+            if (@eventCreate == null)
             {
-                throw new ArgumentNullException(nameof(@event));
+                throw new ArgumentNullException(nameof(@eventCreate));
             }
+
+            var @event = new Event
+            {
+                Name = @eventCreate.Name,
+                Description = @eventCreate.Description,
+                EventUrl = @eventCreate.EventUrl,
+                ImagePath = @eventCreate.ImagePath,
+                Date = @eventCreate.Date,
+                LocationId = @eventCreate.LocationId,
+                Tags = _context.Tags.Where(t => @eventCreate.TagIds.Contains(t.TagId)).ToList()
+            };
 
             _context.Events.Add(@event);
             return Save();
@@ -54,14 +100,29 @@ namespace GospodaWiki.Repository
             return saved >= 0;
         }
 
-        public bool UpdateEvent(Event @event)
+        public bool UpdateEvent(PatchEventDto @event, int @eventId)
         {
             if (@event == null)
             {
                 throw new ArgumentNullException(nameof(@event));
             }
 
-            _context.Events.Update(@event);
+            var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == @eventId);
+
+            if (@eventContext == null)
+            {
+                throw new ArgumentNullException(nameof(@eventContext));
+            }
+
+            @eventContext.Name = @event.Name ?? @eventContext.Name;
+            @eventContext.Description = @event.Description ?? @eventContext.Description;
+            @eventContext.EventUrl = @event.EventUrl ?? @eventContext.EventUrl;
+            @eventContext.ImagePath = @event.ImagePath ?? @eventContext.ImagePath;
+            @eventContext.Date = @event.Date ?? @eventContext.Date;
+            @eventContext.LocationId = @event.LocationId ?? @eventContext.LocationId;
+            @eventContext.Tags = _context.Tags.Where(t => @event.TagIds.Contains(t.TagId)).ToList();
+
+            _context.Events.Update(@eventContext);
             return Save();
         }
 

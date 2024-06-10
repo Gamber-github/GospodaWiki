@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using GospodaWiki.Dto;
+using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +19,10 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<RpgSystem>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<RpgSystemsDto>))]
         public IActionResult GetRpgSystems()
         {
-            var rpgSystems = _mapper.Map<List<RpgSystemDto>>(_rpgSystemRepository.GetRpgSystems());
+            var rpgSystems = _mapper.Map<List<RpgSystemsDto>>(_rpgSystemRepository.GetRpgSystems());
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -31,7 +31,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{rpgSystemId}")]
-        [ProducesResponseType(200, Type = typeof(RpgSystem))]
+        [ProducesResponseType(200, Type = typeof(RpgSystemDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetRpgSystem(int rpgSystemId)
         {
@@ -40,8 +40,8 @@ namespace GospodaWiki.Controllers
                 return NotFound();
             }
 
-            var rpgSystem = _mapper.Map<RpgSystem>(_rpgSystemRepository.GetRpgSystem(rpgSystemId));
-            
+            var rpgSystem = _mapper.Map<RpgSystemDetailsDto>(_rpgSystemRepository.GetRpgSystem(rpgSystemId));
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -51,9 +51,9 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(201)]
+        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateRpgSystem([FromBody] RpgSystemDto rpgSystemCreate)
+        public IActionResult CreateRpgSystem([FromBody] PostRpgSystemDto rpgSystemCreate)
         {
             if (rpgSystemCreate == null)
             {
@@ -70,11 +70,11 @@ namespace GospodaWiki.Controllers
 
             if (rpgSystem != null)
             {
-                ModelState.AddModelError("", $"RpgSystem {rpgSystemCreate.Name} already exists");   
+                ModelState.AddModelError("", $"RpgSystem {rpgSystemCreate.Name} already exists");
                 return StatusCode(422, ModelState);
             }
 
-            var rpgSystemMap = _mapper.Map<RpgSystem>(rpgSystemCreate);
+            var rpgSystemMap = _mapper.Map<PostRpgSystemDto>(rpgSystemCreate);
 
             if (!_rpgSystemRepository.CreateRpgSystem(rpgSystemMap))
             {
@@ -85,11 +85,11 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully created.");
         }
 
-        [HttpPut("{rpgSystemId}")]
+        [HttpPatch("{rpgSystemId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateRpgSystem(int rpgSystemId, [FromBody] RpgSystemDto rpgSystemUpdate)
+        public IActionResult UpdateRpgSystem(int rpgSystemId, [FromBody] PatchRpgSystemDto rpgSystemUpdate)
         {
             if (rpgSystemUpdate == null)
             {
@@ -101,47 +101,20 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (rpgSystemId != rpgSystemUpdate.RpgSystemId)
-            {
-                return BadRequest(ModelState);
-            }
-
             if (!_rpgSystemRepository.RpgSystemExists(rpgSystemId))
             {
                 return NotFound();
             }
 
-            var rpgSystem = _mapper.Map<RpgSystem>(rpgSystemUpdate);
+            var rpgSystem = _mapper.Map<PatchRpgSystemDto>(rpgSystemUpdate);
 
-            if (!_rpgSystemRepository.UpdateRpgSystem(rpgSystem))
+            if (!_rpgSystemRepository.UpdateRpgSystem(rpgSystem, rpgSystemId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating the {rpgSystemUpdate.Name} system.");
                 return StatusCode(500, ModelState);
             }
 
             return Ok("Succesfully updated.");
-        }
-
-        [HttpDelete("{rpgSystemId}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public IActionResult DeleteRpgSystem(int rpgSystemId)
-        {
-            if (!_rpgSystemRepository.RpgSystemExists(rpgSystemId))
-            {
-                return NotFound();
-            }
-
-            var rpgSystem = _rpgSystemRepository.GetRpgSystem(rpgSystemId);
-
-            if (!_rpgSystemRepository.DeleteRpgSystem(rpgSystem))
-            {
-                ModelState.AddModelError("", $"Something went wrong deleting the {rpgSystem.Name} system.");
-                return StatusCode(500, ModelState);
-            }
-
-            return NoContent();
         }
     }
 }
