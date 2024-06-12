@@ -141,6 +141,13 @@ namespace GospodaWiki.Repository
                 }
             }
 
+            var characterToUpdate = _context.Characters.FirstOrDefault(p => p.CharacterId == character.CharacterId);
+
+            if (characterToUpdate == null)
+            {
+                throw new ArgumentNullException(nameof(character));
+            }
+
             _context.Characters.Update(characterContext);
             return await SaveAsync();
         }

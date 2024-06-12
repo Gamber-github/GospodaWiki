@@ -143,6 +143,13 @@ namespace GospodaWiki.Repository
                 }
             }
 
+            var rpgSystemContext = _context.RpgSystems.FirstOrDefault(c => c.RpgSystemId == rpgSystem.RpgSystemId);
+            
+            if (rpgSystemContext == null)
+            {
+                throw new ArgumentNullException(nameof(rpgSystem));
+            }
+
             _context.RpgSystems.Update(rpgSystemContext);
             return await SaveAsync();
         }

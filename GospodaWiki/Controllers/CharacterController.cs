@@ -6,7 +6,7 @@ using GospodaWiki.Dto.Character;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("v1/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CharacterController : Controller
     {
@@ -83,8 +83,7 @@ namespace GospodaWiki.Controllers
 
             return Ok("Succesfully Created");
         }
-
-        [HttpPatch("{characterId}")]
+        [HttpPatch]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
 

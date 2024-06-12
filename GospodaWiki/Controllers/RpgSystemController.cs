@@ -106,11 +106,33 @@ namespace GospodaWiki.Controllers
                 return NotFound();
             }
 
-            var rpgSystem = _mapper.Map<PatchRpgSystemDto>(rpgSystemUpdate);
+            var rpgSystem = _mapper.Map<RpgSystem>(rpgSystemUpdate);
 
             if (!await _rpgSystemRepository.UpdateRpgSystem(rpgSystem, rpgSystemId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating the {rpgSystemUpdate.Name} system.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully updated.");
+        }
+
+        [HttpDelete("{rpgSystemId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteRpgSystem(int rpgSystemId)
+        {
+            if (!_rpgSystemRepository.RpgSystemExists(rpgSystemId))
+            {
+                return NotFound();
+            }
+
+            var rpgSystem = _rpgSystemRepository.GetRpgSystem(rpgSystemId);
+
+            if (!_rpgSystemRepository.DeleteRpgSystem(rpgSystem))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the {rpgSystem.Name} system.");
                 return StatusCode(500, ModelState);
             }
 
