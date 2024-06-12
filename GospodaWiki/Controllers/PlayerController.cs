@@ -20,7 +20,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Player>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<PlayerDto>))]
         public IActionResult GetPlayers()
         {
             var players = mapper.Map<List<PlayerDto>>(playerInterface.GetPlayers());

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using GospodaWiki.Data;
+using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GospodaWiki.Repository
 {
@@ -14,13 +16,42 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<Location> GetLocations()
+        public ICollection<LocationsDto> GetLocations()
         {
-            return _context.Locations.ToList();
+            var locations = _context.Locations.ToList();
+            var locationsDto = new List<LocationsDto>();
+
+            foreach (var location in locations)
+            {
+                locationsDto.Add(new LocationsDto
+                {
+                    LocationId = location.LocationId,
+                    Name = location.Name,
+                    Address = location.Address,
+                    City = location.City,
+                    LocationURL = location.LocationURL
+                });
+            }
+            
+            return locationsDto;
         }
-        public Location GetLocation(int locationId)
+
+        public LocationDetailsDto GetLocation(int locationId)
         {
-            return _context.Locations.Where(l => l.LocationId == locationId).FirstOrDefault();
+            var Location = _context.Locations.Where(l => l.LocationId == locationId).FirstOrDefault();
+            var Events = _context.Events.Where(e => e.LocationId == locationId).Select(e => e.Name);
+
+            var locationDetailsDto = new LocationDetailsDto
+            {
+                LocationId = Location.LocationId,
+                Name = Location.Name,
+                Address = Location.Address,
+                City = Location.City,
+                LocationURL = Location.LocationURL,
+                Events = Events.ToList()
+            };
+
+            return locationDetailsDto;
         }
         public Location GetLocation(string locationName)
         {
@@ -35,14 +66,22 @@ namespace GospodaWiki.Repository
         {
             return _context.Locations.Any(l => l.LocationId == locationId);
         }
-        public bool CreateLocation(Location location)
+        public bool CreateLocation(PostLocationDto location)
         {
             if(location == null)
             {
                 throw new ArgumentNullException(nameof(location));
             }
 
-            _context.Locations.Add(location);
+            var locationDto = new Location
+            {
+                Name = location.Name,
+                Address = location.Address,
+                City = location.City,
+                LocationURL = location.LocationURL
+            };
+
+            _context.Locations.Add(locationDto);
             return Save();
         }
         public bool Save()
@@ -50,14 +89,46 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >=0;
         }
-        public bool UpdateLocation(Location location)
+        public async Task<bool> SaveAsync()
         {
-            if(location == null)
+            var saved = await _context.SaveChangesAsync();
+            return saved >= 0;
+        }
+        public async Task<bool> UpdateLocation(PatchLocationDto locationToUpdate, int locationId)
+        {
+            if(locationToUpdate == null)
             {
-                throw new ArgumentNullException(nameof(location));
+                throw new ArgumentNullException(nameof(locationToUpdate));
             }
-            _context.Locations.Update(location);
-            return Save();
+
+            var locationContext = await _context.Locations
+                .Include(c => c.Events)
+                .FirstOrDefaultAsync(l => l.LocationId == locationId);
+
+            if(locationContext == null)
+            {
+                throw new ArgumentNullException(nameof(locationToUpdate));
+            }
+
+            locationContext.Name = locationToUpdate.Name ?? locationContext.Name;
+            locationContext.Address = locationToUpdate.Address ?? locationContext.Address;
+            locationContext.City = locationToUpdate.City ?? locationContext.City;
+            locationContext.LocationURL = locationToUpdate.LocationURL ?? locationContext.LocationURL;
+
+            if(locationToUpdate.EventId != null)
+            {                 
+                locationContext.Events?.Clear();
+                if(locationToUpdate.EventId.Any())
+                {
+                    var events = await _context.Events
+                        .Where(e => locationToUpdate.EventId.Contains(e.EventId))
+                        .ToListAsync();
+                    locationContext.Events = events;
+                }
+            }
+
+            _context.Locations.Update(locationContext);
+            return await SaveAsync();
         }
         public bool DeleteLocation(Location location)
         {

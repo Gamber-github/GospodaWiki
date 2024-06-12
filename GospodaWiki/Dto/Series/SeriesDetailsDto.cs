@@ -1,0 +1,18 @@
+﻿using GospodaWiki.Dto.Tag;
+using GospodaWiki.Models;
+
+namespace GospodaWiki.Dto.Series
+{
+    public class SeriesDetailsDto
+    {
+        public int SeriesId { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public ICollection<TagDetailsDto>? Tags { get; set; }
+        public ICollection<PlayerDto>? Players { get; set; }
+        public ICollection<GospodaWiki.Dto.Character.CharacterDetailsDto>? Characters { get; set; }
+        public int? RpgSystemId { get; set; }
+        public GospodaWiki.Dto.RpgSystem.RpgSystemsDto? RpgSystem { get; set; }
+        public string? YoutubePlaylistId { get; set; }
+    }
+}
