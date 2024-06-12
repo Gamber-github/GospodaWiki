@@ -10,7 +10,7 @@ namespace GospodaWiki.Interfaces
         RpgSystem GetRpgSystem(string name);
         bool RpgSystemExists(int rpgSystemId);
         bool CreateRpgSystem(PostRpgSystemDto rpgSystem);
-        bool UpdateRpgSystem(PatchRpgSystemDto rpgSystem, int rpgSystemId);
+        Task<bool> UpdateRpgSystem(PatchRpgSystemDto rpgSystem, int rpgSystemId);
         bool Save();
     }
 }

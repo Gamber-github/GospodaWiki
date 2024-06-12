@@ -86,7 +86,7 @@ namespace GospodaWiki.Controllers
         [HttpPatch("{seriesId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult UpdateSeries([FromBody] PatchSeriesDto seriesUpdate, [FromRoute] int seriesId)
+        public async Task<IActionResult> UpdateSeries([FromBody] PatchSeriesDto seriesUpdate, [FromRoute] int seriesId)
         {
             if (seriesUpdate == null || !ModelState.IsValid)
             {
@@ -101,7 +101,7 @@ namespace GospodaWiki.Controllers
 
             var seriesMap = _mapper.Map<PatchSeriesDto>(seriesUpdate);
 
-            if (!_seriesRepository.UpdateSeries(seriesMap, seriesId))
+            if (!await _seriesRepository.UpdateSeries(seriesMap, seriesId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating series {seriesUpdate.Name}");
                 return StatusCode(500, ModelState);

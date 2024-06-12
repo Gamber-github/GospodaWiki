@@ -89,7 +89,7 @@ namespace GospodaWiki.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateRpgSystem(int rpgSystemId, [FromBody] PatchRpgSystemDto rpgSystemUpdate)
+        public async Task<IActionResult> UpdateRpgSystem(int rpgSystemId, [FromBody] PatchRpgSystemDto rpgSystemUpdate)
         {
             if (rpgSystemUpdate == null)
             {
@@ -108,13 +108,13 @@ namespace GospodaWiki.Controllers
 
             var rpgSystem = _mapper.Map<PatchRpgSystemDto>(rpgSystemUpdate);
 
-            if (!_rpgSystemRepository.UpdateRpgSystem(rpgSystem, rpgSystemId))
+            if (!await _rpgSystemRepository.UpdateRpgSystem(rpgSystem, rpgSystemId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating the {rpgSystemUpdate.Name} system.");
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Succesfully updated.");
+            return NoContent();
         }
     }
 }

@@ -9,8 +9,9 @@ namespace GospodaWiki.Interfaces
         LocationDetailsDto GetLocation(int locationId);
         bool LocationExists(int locationId);
         bool CreateLocation(PostLocationDto location);
-        bool UpdateLocation(PatchLocationDto location, int locationId);
+        Task<bool> UpdateLocation(PatchLocationDto location, int locationId);
         bool DeleteLocation(Location location);
         bool Save();
+        Task<bool> SaveAsync();
     }
 }

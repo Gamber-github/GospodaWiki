@@ -75,7 +75,7 @@ namespace GospodaWiki.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateEvent(int eventId, [FromBody] PatchEventDto eventUpdate)
+        public async Task<IActionResult> UpdateEvent(int eventId, [FromBody] PatchEventDto eventUpdate)
         {
             if (eventUpdate == null)
             {
@@ -99,7 +99,7 @@ namespace GospodaWiki.Controllers
 
             var eventMap = _mapper.Map<PatchEventDto>(eventUpdate);
 
-            if (!_eventRepository.UpdateEvent(eventMap, eventId))
+            if (!await _eventRepository.UpdateEvent(eventMap, eventId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating the event {eventMap.Name}");
                 return StatusCode(500, ModelState);

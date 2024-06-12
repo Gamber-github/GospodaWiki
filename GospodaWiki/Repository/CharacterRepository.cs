@@ -2,6 +2,7 @@
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GospodaWiki.Repository
 {
@@ -86,32 +87,62 @@ namespace GospodaWiki.Repository
             return saved >= 0;
         }
 
-        public bool UpdateCharacter(PatchCharacterDto character, int characterId)
+        public async Task<bool> SaveAsync()
         {
-            if (character == null)
+            var saved = await _context.SaveChangesAsync();
+            return saved >= 0;
+        }
+
+        public async Task<bool> UpdateCharacter(PatchCharacterDto characterToUpdate, int characterId)
+        {
+            if (characterToUpdate == null)
             {
-                throw new ArgumentNullException(nameof(character));
+                throw new ArgumentNullException(nameof(characterToUpdate));
             }
 
-            var characterToUpdate = _context.Characters.FirstOrDefault(p => p.CharacterId == characterId);
+            var characterContext = await _context.Characters
+                .Include(p => p.Tags)
+                .FirstOrDefaultAsync(p => p.CharacterId == characterId);
 
             if (characterToUpdate == null)
             {
-                throw new ArgumentNullException(nameof(character));
+                throw new ArgumentNullException(nameof(characterToUpdate));
             }
 
-            characterToUpdate.FirstName = character.FirstName ?? characterToUpdate.FirstName;
-            characterToUpdate.LastName = character.LastName ?? characterToUpdate.LastName;
-            characterToUpdate.ImagePath = character.ImagePath ?? characterToUpdate.ImagePath;
-            characterToUpdate.Age = character.Age ?? characterToUpdate.Age;
-            characterToUpdate.Description = character.Description ?? characterToUpdate.Description;
-            characterToUpdate.SeriesId = character.Series ?? characterToUpdate.SeriesId;
-            characterToUpdate.RpgSystemId = character.RpgSystemId ?? characterToUpdate.RpgSystemId;
-            characterToUpdate.Tags = _context.Tags.Where(t => character.TagsId.Contains(t.TagId)).ToList();
-            characterToUpdate.Items = _context.Items.Where(i => character.ItemsId.Contains(i.ItemId)).ToList();
+            characterContext.FirstName = characterToUpdate.FirstName ?? characterContext.FirstName;
+            characterContext.LastName = characterToUpdate.LastName ?? characterContext.LastName;
+            characterContext.ImagePath = characterToUpdate.ImagePath ?? characterContext.ImagePath;
+            characterContext.Age = characterToUpdate.Age ?? characterContext.Age;
+            characterContext.Description = characterToUpdate.Description ?? characterContext.Description;
+            characterContext.SeriesId = characterToUpdate.Series ?? characterContext.SeriesId;
+            characterContext.RpgSystemId = characterToUpdate.RpgSystemId ?? characterContext.RpgSystemId;
+           
+            if (characterToUpdate.TagsId != null)
+            {
+                characterContext.Tags.Clear();
+                if (characterToUpdate.TagsId.Any())
+                {
+                    var tags = await _context.Tags
+                        .Where(t => characterToUpdate.TagsId.Contains(t.TagId))
+                        .ToListAsync();
+                    characterContext.Tags = tags;
+                }
+            }
 
-            _context.Characters.Update(characterToUpdate);
-            return Save();
+            if(characterToUpdate.ItemsId != null)
+            {
+                characterContext.Items.Clear();
+                if (characterToUpdate.ItemsId.Any())
+                {
+                    var items = await _context.Items
+                        .Where(i => characterToUpdate.ItemsId.Contains(i.ItemId))
+                        .ToListAsync();
+                    characterContext.Items = items;
+                }
+            }
+
+            _context.Characters.Update(characterContext);
+            return await SaveAsync();
         }
     }
 }

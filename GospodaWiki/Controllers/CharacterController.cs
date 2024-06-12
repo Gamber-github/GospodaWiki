@@ -88,7 +88,7 @@ namespace GospodaWiki.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
 
-        public IActionResult UpdateCharacter([FromRoute] int characterId,[FromBody] PatchCharacterDto characterUpdate)
+        public async Task<IActionResult> UpdateCharacter([FromRoute] int characterId,[FromBody] PatchCharacterDto characterUpdate)
         {
             if (characterUpdate == null || ModelState.IsValid == false)
             {
@@ -103,7 +103,7 @@ namespace GospodaWiki.Controllers
 
             var characterMap = _mapper.Map<PatchCharacterDto>(characterUpdate);
 
-            if (!_characterRepository.UpdateCharacter(characterMap, characterId))
+            if (!await _characterRepository.UpdateCharacter(characterMap, characterId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating the character {characterUpdate.FirstName} {characterUpdate.LastName}");
                 return StatusCode(500, ModelState);

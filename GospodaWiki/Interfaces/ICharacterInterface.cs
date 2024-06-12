@@ -9,7 +9,8 @@ namespace GospodaWiki.Interfaces
         CharacterDetailsDto GetCharacter(int id);
         bool CharacterExists(int characterId);
         bool CreateCharacter(PostCharacterDto character);
-        bool UpdateCharacter(PatchCharacterDto character, int characterId);
+        Task<bool> UpdateCharacter(PatchCharacterDto character, int characterId);
         bool Save();
+        Task<bool> SaveAsync();
     }
 }

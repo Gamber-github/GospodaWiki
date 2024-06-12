@@ -9,7 +9,8 @@ namespace GospodaWiki.Interfaces
         EventDetailsDto GetEvent(int eventId);
         bool EventExists(int eventId);
         bool CreateEvent(PostEventDto @event);
-        bool UpdateEvent(PatchEventDto @event, int @eventId);
+        Task<bool> UpdateEvent(PatchEventDto @event, int @eventId);
         bool Save();
+        Task<bool> SaveAsync();
     }
 }

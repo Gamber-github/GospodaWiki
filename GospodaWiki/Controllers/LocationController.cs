@@ -91,7 +91,7 @@ namespace GospodaWiki.Controllers
         [HttpPatch("{locationId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult UpdateLocation([FromRoute] int locationId, [FromBody] PatchLocationDto locationUpdate)
+        public async Task <IActionResult> UpdateLocation([FromRoute] int locationId, [FromBody] PatchLocationDto locationUpdate)
         {
             if (locationUpdate == null)
             {
@@ -110,7 +110,7 @@ namespace GospodaWiki.Controllers
 
             var locationMap = _mapper.Map<PatchLocationDto>(locationUpdate);
 
-            if (!_locationRepository.UpdateLocation(locationMap, locationId))
+            if (!await _locationRepository.UpdateLocation(locationMap, locationId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating {locationUpdate.Name}");
                 return StatusCode(500, ModelState);

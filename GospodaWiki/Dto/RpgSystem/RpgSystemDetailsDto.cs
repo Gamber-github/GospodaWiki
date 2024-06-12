@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Models;
+﻿using GospodaWiki.Dto.Tag;
+using GospodaWiki.Models;
 
 namespace GospodaWiki.Dto.RpgSystem
 {
@@ -9,7 +10,7 @@ namespace GospodaWiki.Dto.RpgSystem
         public string Description { get; set; }
         public string? ImagePath { get; set; }
         public string? StoryName { get; set; }
-        public ICollection<string>? Tags { get; set; }
+        public ICollection<TagDetailsDto>? Tags { get; set; }
         public ICollection<string>? Characters { get; set; }
         public ICollection<string>? Series { get; set; }
     }

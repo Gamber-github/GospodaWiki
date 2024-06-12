@@ -2,6 +2,7 @@
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GospodaWiki.Repository
 {
@@ -99,31 +100,46 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >= 0;
         }
-
-        public bool UpdateEvent(PatchEventDto @event, int @eventId)
+        public async Task<bool> SaveAsync()
         {
-            if (@event == null)
+            var saved = await _context.SaveChangesAsync();
+            return saved >= 0;
+        }
+
+        public async Task<bool> UpdateEvent(PatchEventDto eventToUpdate, int @eventId)
+        {
+            if (eventToUpdate == null)
             {
-                throw new ArgumentNullException(nameof(@event));
+                throw new ArgumentNullException(nameof(eventToUpdate));
             }
 
-            var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == @eventId);
+            var @eventContext = _context.Events
+                .Include(e => e.Tags)
+                .FirstOrDefault(p => p.EventId == @eventId);
 
             if (@eventContext == null)
             {
                 throw new ArgumentNullException(nameof(@eventContext));
             }
 
-            @eventContext.Name = @event.Name ?? @eventContext.Name;
-            @eventContext.Description = @event.Description ?? @eventContext.Description;
-            @eventContext.EventUrl = @event.EventUrl ?? @eventContext.EventUrl;
-            @eventContext.ImagePath = @event.ImagePath ?? @eventContext.ImagePath;
-            @eventContext.Date = @event.Date ?? @eventContext.Date;
-            @eventContext.LocationId = @event.LocationId ?? @eventContext.LocationId;
-            @eventContext.Tags = _context.Tags.Where(t => @event.TagIds.Contains(t.TagId)).ToList();
+            @eventContext.Name = eventToUpdate.Name ?? @eventContext.Name;
+            @eventContext.Description = eventToUpdate.Description ?? @eventContext.Description;
+            @eventContext.EventUrl = eventToUpdate.EventUrl ?? @eventContext.EventUrl;
+            @eventContext.ImagePath = eventToUpdate.ImagePath ?? @eventContext.ImagePath;
+            @eventContext.Date = eventToUpdate.Date ?? @eventContext.Date;
+            @eventContext.LocationId = eventToUpdate.LocationId ?? @eventContext.LocationId;
+
+            if (eventToUpdate.TagIds != null)
+            {
+                @eventContext.Tags.Clear();
+                var tags = await _context.Tags
+                    .Where(t => eventToUpdate.TagIds.Contains(t.TagId))
+                    .ToListAsync();
+                @eventContext.Tags = tags;
+            }
 
             _context.Events.Update(@eventContext);
-            return Save();
+            return await SaveAsync();
         }
 
         public bool DeleteEvent(Event @event)

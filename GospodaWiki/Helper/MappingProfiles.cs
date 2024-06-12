@@ -5,6 +5,7 @@ using GospodaWiki.Dto.Event;
 using GospodaWiki.Dto.Location;
 using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Dto.Series;
+using GospodaWiki.Dto.Tag;
 using GospodaWiki.Models;
 
 namespace GospodaWiki.Helper
@@ -46,6 +47,8 @@ namespace GospodaWiki.Helper
             CreateMap<SeriesDto, Series>();
             CreateMap<SeriesDetailsDto, Series>();
             CreateMap<PostSeriesDto, Series>();
+
+            CreateMap<TagDetailsDto, Tag>();
         }
     }
 }
