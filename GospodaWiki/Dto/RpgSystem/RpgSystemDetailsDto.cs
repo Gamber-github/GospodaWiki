@@ -1,4 +1,7 @@
 ﻿
+using GospodaWiki.Dto.Tag;
+
+namespace GospodaWiki.Dto.RpgSystem
 {
     public class RpgSystemDetailsDto
     {
