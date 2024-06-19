@@ -1,17 +1,17 @@
 ﻿using GospodaWiki.Dto.Series;
-using GospodaWiki.Models;
 
 namespace GospodaWiki.Interfaces
 {
     public interface ISeriesInterface
     {
-        ICollection<SeriesDto> GetSeries();
-        SeriesDetailsDto GetSeriesById(int seriesId);
+        ICollection<GetSeriesDto> GetSeries();
+        ICollection<GetSeriesDto> GetUnpublishedSeries();
+        GetSeriesDetailsDto GetSeriesById(int seriesId);
+        GetSeriesDetailsDto GetUnpublishedSeriesById(int seriesId);
         bool SeriesExists(int seriesId);
         bool CreateSeries(PostSeriesDto series);
         bool Save();
-        Task<bool> UpdateSeries(PatchSeriesDto series, int seriesId);
-        Task<bool> SaveAsync();
-
+        bool UpdateSeries(PutSeriesDto series, int seriesId);
+        bool PublishSeries(int seriesId);
     }
 }

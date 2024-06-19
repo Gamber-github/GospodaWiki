@@ -21,10 +21,10 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<SeriesDto>))]
-        public IActionResult GetSeries()
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetSeriesDto>))]
+        public IActionResult GetUnpublishedSeries()
         {
-            var series = _mapper.Map<List<SeriesDto>>(_seriesRepository.GetSeries());
+            var series = _mapper.Map<List<GetSeriesDto>>(_seriesRepository.GetUnpublishedSeries());
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -33,15 +33,15 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{seriesId}")]
-        [ProducesResponseType(200, Type = typeof(SeriesDetailsDto))]
-        public IActionResult GetSeriesById(int seriesId)
+        [ProducesResponseType(200, Type = typeof(GetSeriesDetailsDto))]
+        public IActionResult GetUnpublishedSeriesById(int seriesId)
         {
             if(!_seriesRepository.SeriesExists(seriesId))
             {
                 return NotFound();
             }
 
-            var series = _mapper.Map<SeriesDetailsDto>(_seriesRepository.GetSeriesById(seriesId));
+            var series = _mapper.Map<GetSeriesDetailsDto>(_seriesRepository.GetUnpublishedSeriesById(seriesId));
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -83,10 +83,10 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully Created");
         }
 
-        [HttpPatch("{seriesId}")]
+        [HttpPut("{seriesId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> UpdateSeries([FromBody] PatchSeriesDto seriesUpdate, [FromRoute] int seriesId)
+        public IActionResult UpdateSeries([FromBody] PutSeriesDto seriesUpdate, [FromRoute] int seriesId)
         {
             if (seriesUpdate == null || !ModelState.IsValid)
             {
@@ -99,15 +99,35 @@ namespace GospodaWiki.Controllers
                 return StatusCode(404, ModelState);
             }
 
-            var seriesMap = _mapper.Map<PatchSeriesDto>(seriesUpdate);
+            var seriesMap = _mapper.Map<PutSeriesDto>(seriesUpdate);
 
-            if (!await _seriesRepository.UpdateSeries(seriesMap, seriesId))
+            if (!_seriesRepository.UpdateSeries(seriesMap, seriesId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating series {seriesUpdate.Name}");
                 return StatusCode(500, ModelState);
             }
 
             return Ok("Succesfully Updated");
+        }
+
+        [HttpPatch("{seriesId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult PublishSeries([FromRoute] int seriesId)
+        {
+            if (!_seriesRepository.SeriesExists(seriesId))
+            {
+                ModelState.AddModelError("", $"Series with id {seriesId} does not exist");
+                return StatusCode(404, ModelState);
+            }
+
+            if (!_seriesRepository.PublishSeries(seriesId))
+            {
+                ModelState.AddModelError("", $"Something went wrong publishing series with id {seriesId}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully Published");
         }
     }
 }

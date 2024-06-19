@@ -10,5 +10,6 @@ namespace GospodaWiki.Models
         public ICollection<Event>? Events { get; set; }
         public ICollection<Item>? Items { get; set; }
         public ICollection<Story>? Stories { get; set; }
+        public bool isPublished { get; set; } = false;
     }
 }

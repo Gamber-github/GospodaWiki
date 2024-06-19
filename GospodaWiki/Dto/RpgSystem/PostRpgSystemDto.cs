@@ -1,6 +1,4 @@
-﻿using GospodaWiki.Models;
-
-namespace GospodaWiki.Dto.RpgSystem
+﻿namespace GospodaWiki.Dto.RpgSystem
 {
     public class PostRpgSystemDto
     {

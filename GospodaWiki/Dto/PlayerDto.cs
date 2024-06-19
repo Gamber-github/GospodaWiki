@@ -10,5 +10,6 @@ namespace GospodaWiki.Dto
         public int? Age { get; set; }
         public string? About { get; set; } = null!;
         public string? Image { get; set; } = null!;
+        public bool isPublished { get; set; }
     }
 }

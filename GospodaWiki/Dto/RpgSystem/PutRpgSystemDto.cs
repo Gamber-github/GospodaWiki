@@ -1,6 +1,4 @@
-﻿using GospodaWiki.Models;
-
-namespace GospodaWiki.Dto.RpgSystem
+﻿namespace GospodaWiki.Dto.RpgSystem
 {
     public class PutRpgSystemDto
     {
@@ -9,8 +7,8 @@ namespace GospodaWiki.Dto.RpgSystem
         public string? Description { get; set; }
         public string? ImagePath { get; set; }
         public string? StoryName { get; set; }
-        public ICollection<string>? Tags { get; set; }
-        public ICollection<string>? Characters { get; set; }
-        public ICollection<string>? Series { get; set; }
+        public ICollection<int>? TagsId { get; set; }
+        public ICollection<int>? CharactersId { get; set; }
+        public ICollection<int>? SeriesId { get; set; }
     }
 }

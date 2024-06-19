@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Interfaces;
-using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("v1/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class EventController : Controller
     {
@@ -20,9 +19,9 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<EventsDto>))]
-        public IActionResult GetEvents()
+        public IActionResult GetUnpublishedEvents()
         {
-            var events = _mapper.Map<List<EventsDto>>(_eventRepository.GetEvents());
+            var events = _mapper.Map<List<EventsDto>>(_eventRepository.GetUnpublishedEvents());
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -33,14 +32,14 @@ namespace GospodaWiki.Controllers
         [HttpGet("{eventId}")]
         [ProducesResponseType(200, Type = typeof(EventDetailsDto))]
         [ProducesResponseType(400)]
-        public IActionResult GetEvent(int eventId)
+        public IActionResult GetUnpublishedEvent(int eventId)
         {
            if(!_eventRepository.EventExists(eventId))
             {
                 return NotFound();
             }
 
-            var events = _mapper.Map<EventDetailsDto>(_eventRepository.GetEvent(eventId));
+            var events = _mapper.Map<EventDetailsDto>(_eventRepository.GetUnpublishedEvent(eventId));
 
             if (!ModelState.IsValid)
             {
@@ -71,11 +70,11 @@ namespace GospodaWiki.Controllers
 
         }
 
-        [HttpPatch("{eventId}")]
+        [HttpPut("{eventId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> UpdateEvent(int eventId, [FromBody] PatchEventDto eventUpdate)
+        public IActionResult UpdateEvent(int eventId, [FromBody] PutEventDto eventUpdate)
         {
             if (eventUpdate == null)
             {
@@ -97,15 +96,35 @@ namespace GospodaWiki.Controllers
                 return NotFound();
             }
 
-            var eventMap = _mapper.Map<PatchEventDto>(eventUpdate);
+            var eventMap = _mapper.Map<PutEventDto>(eventUpdate);
 
-            if (!await _eventRepository.UpdateEvent(eventMap, eventId))
+            if (!_eventRepository.UpdateEvent(eventMap, eventId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating the event {eventMap.Name}");
                 return StatusCode(500, ModelState);
             }
 
             return Ok("Successfully updated");
+        }
+
+        [HttpPatch("{eventId}/publish")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> PublishEvent([FromRoute] int eventId)
+        {
+            if (!_eventRepository.EventExists(eventId))
+            {
+                ModelState.AddModelError("", $"Something went wrong.");
+                return NotFound(ModelState);
+            }
+
+            if (!await _eventRepository.PublishEvent(eventId))
+            {
+                ModelState.AddModelError("", $"Something went wrong publishing the event with id {eventId}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully published");
         }
     }
 }

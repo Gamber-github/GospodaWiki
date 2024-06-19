@@ -12,5 +12,6 @@
         public ICollection<Tag>? Tags { get; set; }
         public ICollection<Character>? Characters { get; set; }
         public ICollection<Series>? Series { get; set; }
+        public bool isPublished { get; set; } = false;
     }
 }

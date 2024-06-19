@@ -8,5 +8,6 @@
         public string EventUrl { get; set; }
         public string ImagePath { get; set; }
         public DateTime? Date { get; set; }
+        public bool isPublished { get; set; }
     }
 }

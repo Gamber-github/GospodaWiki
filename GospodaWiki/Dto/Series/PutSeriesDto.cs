@@ -2,7 +2,7 @@
 
 namespace GospodaWiki.Dto.Series
 {
-    public class PatchSeriesDto
+    public class PutSeriesDto
     {
         public string? Name { get; set; }
         public string? Description { get; set; }

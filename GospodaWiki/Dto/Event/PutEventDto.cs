@@ -1,6 +1,6 @@
 ﻿namespace GospodaWiki.Dto.Event
 {
-    public class PatchEventDto
+    public class PutEventDto
     {
         public string? Name { get; set; }
         public string? Description { get; set; }

@@ -19,10 +19,10 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<RpgSystemsDto>))]
-        public IActionResult GetRpgSystems()
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetRpgSystemsDto>))]
+        public IActionResult GetUnpublishedRpgSystems()
         {
-            var rpgSystems = _mapper.Map<List<RpgSystemsDto>>(_rpgSystemRepository.GetRpgSystems());
+            var rpgSystems = _mapper.Map<List<GetRpgSystemsDto>>(_rpgSystemRepository.GetUnpublishedRpgSystems());
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -31,16 +31,16 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{rpgSystemId}")]
-        [ProducesResponseType(200, Type = typeof(RpgSystemDetailsDto))]
+        [ProducesResponseType(200, Type = typeof(GetRpgSystemDetailsDto))]
         [ProducesResponseType(400)]
-        public IActionResult GetRpgSystem(int rpgSystemId)
+        public IActionResult GetUnpublishedRpgSystem(int rpgSystemId)
         {
             if (!_rpgSystemRepository.RpgSystemExists(rpgSystemId))
             {
                 return NotFound();
             }
 
-            var rpgSystem = _mapper.Map<RpgSystemDetailsDto>(_rpgSystemRepository.GetRpgSystem(rpgSystemId));
+            var rpgSystem = _mapper.Map<GetRpgSystemDetailsDto>(_rpgSystemRepository.GetUnpublishedRpgSystem(rpgSystemId));
 
             if (!ModelState.IsValid)
             {
@@ -85,11 +85,11 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully created.");
         }
 
-        [HttpPatch("{rpgSystemId}")]
+        [HttpPut("{rpgSystemId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> UpdateRpgSystem(int rpgSystemId, [FromBody] PatchRpgSystemDto rpgSystemUpdate)
+        public IActionResult UpdateRpgSystem(int rpgSystemId, [FromBody] PutRpgSystemDto rpgSystemUpdate)
         {
             if (rpgSystemUpdate == null)
             {
@@ -106,9 +106,9 @@ namespace GospodaWiki.Controllers
                 return NotFound();
             }
 
-            var rpgSystem = _mapper.Map<RpgSystem>(rpgSystemUpdate);
+            var rpgSystem = _mapper.Map<PutRpgSystemDto>(rpgSystemUpdate);
 
-            if (!await _rpgSystemRepository.UpdateRpgSystem(rpgSystem, rpgSystemId))
+            if (!_rpgSystemRepository.UpdateRpgSystem(rpgSystem, rpgSystemId))
             {
                 ModelState.AddModelError("", $"Something went wrong updating the {rpgSystemUpdate.Name} system.");
                 return StatusCode(500, ModelState);
@@ -117,26 +117,24 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully updated.");
         }
 
-        [HttpDelete("{rpgSystemId}")]
+        [HttpPatch("{rpgSystemId}")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public IActionResult DeleteRpgSystem(int rpgSystemId)
+        [ProducesResponseType(500)]
+        public IActionResult PublishRpgSystem(int rpgSystemId)
         {
             if (!_rpgSystemRepository.RpgSystemExists(rpgSystemId))
             {
-                return NotFound();
-            }
-
-            var rpgSystem = _rpgSystemRepository.GetRpgSystem(rpgSystemId);
-
-            if (!_rpgSystemRepository.DeleteRpgSystem(rpgSystem))
-            {
-                ModelState.AddModelError("", $"Something went wrong deleting the {rpgSystem.Name} system.");
+                ModelState.AddModelError("", $"Something went wrong.");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            if (!_rpgSystemRepository.PublishRpgSystem(rpgSystemId))
+            {
+                ModelState.AddModelError("", $"Something went wrong publishing the {rpgSystemId} system.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully published.");
         }
     }
 }

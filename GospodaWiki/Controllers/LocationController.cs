@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
-using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -22,14 +21,14 @@ namespace GospodaWiki.Controllers
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(LocationDetailsDto))]
         [ProducesResponseType(400)]
-        public IActionResult GetLocations()
+        public IActionResult GetUnpublishedLocations()
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var locations = _locationRepository.GetLocations();
+            var locations = _locationRepository.GetUnpublishedLocations();
 
             return Ok(locations);
         }
@@ -37,9 +36,9 @@ namespace GospodaWiki.Controllers
         [HttpGet("{locationId}")]
         [ProducesResponseType(200, Type = typeof(LocationDetailsDto))]
         [ProducesResponseType(400)]
-        public IActionResult GetLocation(int locationId)
+        public async Task<IActionResult> GetUnpublishedLocation(int locationId)
         {
-            if (!_locationRepository.LocationExists(locationId))
+            if (!await _locationRepository.LocationExists(locationId))
             {
                 return NotFound();
             }
@@ -49,7 +48,7 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            var location = _locationRepository.GetLocation(locationId);
+            var location = _locationRepository.GetUnpublishedLocation(locationId);
 
             return Ok(location);
         }
@@ -88,10 +87,10 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully Created");
         }
 
-        [HttpPatch("{locationId}")]
+        [HttpPut("{locationId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task <IActionResult> UpdateLocation([FromRoute] int locationId, [FromBody] PatchLocationDto locationUpdate)
+        public async Task <IActionResult> UpdateLocation([FromRoute] int locationId, [FromBody] PutLocationDto locationUpdate)
         {
             if (locationUpdate == null)
             {
@@ -103,12 +102,12 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (!_locationRepository.LocationExists(locationId))
+            if (!await _locationRepository.LocationExists(locationId))
             {
                 return NotFound();
             }
 
-            var locationMap = _mapper.Map<PatchLocationDto>(locationUpdate);
+            var locationMap = _mapper.Map<PutLocationDto>(locationUpdate);
 
             if (!await _locationRepository.UpdateLocation(locationMap, locationId))
             {
@@ -117,6 +116,26 @@ namespace GospodaWiki.Controllers
             }
 
             return NoContent();
+        }
+        
+        [HttpPatch("{locationId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> PublishLocation([FromRoute] int locationId)
+        {
+            if (!await _locationRepository.LocationExists(locationId))
+            {
+                ModelState.AddModelError("", $"Something went wrong.");
+                return NotFound(ModelState);
+            }
+
+            if (!await _locationRepository.PublishLocation(locationId))
+            {
+                ModelState.AddModelError("", $"Something went wrong publishing location.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully Published");
         }
     }
 }

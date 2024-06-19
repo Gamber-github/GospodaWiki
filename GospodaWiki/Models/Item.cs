@@ -10,5 +10,6 @@
         public ICollection<Character>? Characters { get; set; }
         public string? OwnerName { get; set; }
         public ICollection<Tag>? Tags { get; set; }
+        public bool isPublished { get; set; } = false;
     }
 }

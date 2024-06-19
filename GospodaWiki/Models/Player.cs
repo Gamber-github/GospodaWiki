@@ -8,6 +8,7 @@
         public int? Age { get; set; }
         public string? About { get; set; }
         public string? Image { get; set; }
-        public ICollection<Series>? Series { get; set; } 
+        public ICollection<Series>? Series { get; set; }
+        public bool isPublished { get; set; } = false;
     }
 }
