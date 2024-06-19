@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using GospodaWiki.Data;
+﻿using GospodaWiki.Data;
 using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
@@ -18,6 +17,26 @@ namespace GospodaWiki.Repository
 
         public ICollection<LocationsDto> GetLocations()
         {
+            var locations = _context.Locations.Where(l => l.isPublished).ToList();
+            var locationsDto = new List<LocationsDto>();
+
+            foreach (var location in locations)
+            {
+                locationsDto.Add(new LocationsDto
+                {
+                    LocationId = location.LocationId,
+                    Name = location.Name,
+                    Address = location.Address,
+                    City = location.City,
+                    LocationURL = location.LocationURL,
+                    isPublished = location.isPublished
+                });
+            }
+            
+            return locationsDto;
+        }
+        public ICollection<LocationsDto> GetUnpublishedLocations()
+        {
             var locations = _context.Locations.ToList();
             var locationsDto = new List<LocationsDto>();
 
@@ -29,14 +48,32 @@ namespace GospodaWiki.Repository
                     Name = location.Name,
                     Address = location.Address,
                     City = location.City,
-                    LocationURL = location.LocationURL
+                    LocationURL = location.LocationURL,
+                    isPublished = location.isPublished
                 });
             }
-            
+
             return locationsDto;
         }
-
         public LocationDetailsDto GetLocation(int locationId)
+        {
+            var Location = _context.Locations.Where(l => l.LocationId == locationId && l.isPublished).FirstOrDefault();
+            var Events = _context.Events.Where(e => e.LocationId == locationId).Select(e => e.Name);
+
+            var locationDetailsDto = new LocationDetailsDto
+            {
+                LocationId = Location.LocationId,
+                Name = Location.Name,
+                Address = Location.Address,
+                City = Location.City,
+                LocationURL = Location.LocationURL,
+                Events = Events.ToList(),
+                isPublished = Location.isPublished
+            };
+
+            return locationDetailsDto;
+        }
+        public LocationDetailsDto GetUnpublishedLocation(int locationId)
         {
             var Location = _context.Locations.Where(l => l.LocationId == locationId).FirstOrDefault();
             var Events = _context.Events.Where(e => e.LocationId == locationId).Select(e => e.Name);
@@ -48,7 +85,8 @@ namespace GospodaWiki.Repository
                 Address = Location.Address,
                 City = Location.City,
                 LocationURL = Location.LocationURL,
-                Events = Events.ToList()
+                Events = Events.ToList(),
+                isPublished = Location.isPublished
             };
 
             return locationDetailsDto;
@@ -62,9 +100,10 @@ namespace GospodaWiki.Repository
         
             return _context.Locations.FirstOrDefault(l => l.Name.Trim().ToUpper() == locationName.Trim().ToUpper());
         }
-        public bool LocationExists(int locationId)
+        public async Task<bool> LocationExists(int locationId)
         {
-            return _context.Locations.Any(l => l.LocationId == locationId);
+            var location = await _context.Locations.AnyAsync(l => l.LocationId == locationId);
+            return location;
         }
         public bool CreateLocation(PostLocationDto location)
         {
@@ -94,7 +133,7 @@ namespace GospodaWiki.Repository
             var saved = await _context.SaveChangesAsync();
             return saved >= 0;
         }
-        public async Task<bool> UpdateLocation(PatchLocationDto locationToUpdate, int locationId)
+        public async Task<bool> UpdateLocation(PutLocationDto locationToUpdate, int locationId)
         {
             if(locationToUpdate == null)
             {
@@ -102,32 +141,24 @@ namespace GospodaWiki.Repository
             }
 
             var locationContext = await _context.Locations
-                .Include(c => c.Events)
                 .FirstOrDefaultAsync(l => l.LocationId == locationId);
 
             if(locationContext == null)
             {
                 throw new ArgumentNullException(nameof(locationToUpdate));
             }
+            var events = await _context.Events.Where(e => locationToUpdate.EventId.Contains(e.EventId)).ToListAsync();
 
-            locationContext.Name = locationToUpdate.Name ?? locationContext.Name;
-            locationContext.Address = locationToUpdate.Address ?? locationContext.Address;
-            locationContext.City = locationToUpdate.City ?? locationContext.City;
-            locationContext.LocationURL = locationToUpdate.LocationURL ?? locationContext.LocationURL;
+            var locationDto =  new Location
+            {
+                Name = locationToUpdate.Name,
+                Address = locationToUpdate.Address,
+                City = locationToUpdate.City,
+                LocationURL = locationToUpdate.LocationURL,
+                Events = events
+            };
 
-            if(locationToUpdate.EventId != null)
-            {                 
-                locationContext.Events?.Clear();
-                if(locationToUpdate.EventId.Any())
-                {
-                    var events = await _context.Events
-                        .Where(e => locationToUpdate.EventId.Contains(e.EventId))
-                        .ToListAsync();
-                    locationContext.Events = events;
-                }
-            }
-
-            _context.Locations.Update(locationContext);
+            _context.Locations.Update(locationDto);
             return await SaveAsync();
         }
         public bool DeleteLocation(Location location)
@@ -139,6 +170,18 @@ namespace GospodaWiki.Repository
 
             _context.Locations.Remove(location);
             return Save();
+        }
+        public async Task<bool> PublishLocation(int locationId)
+        {
+            var location = await _context.Locations.FirstOrDefaultAsync(l => l.LocationId == locationId);
+            if(location == null)
+            {
+                return false;
+            }
+
+            location.isPublished = true;
+            _context.Locations.Update(location);
+            return await SaveAsync();
         }
     }
 }

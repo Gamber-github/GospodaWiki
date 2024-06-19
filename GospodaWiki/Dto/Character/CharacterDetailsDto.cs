@@ -10,6 +10,7 @@
         public string? Description { get; set; }
         public string Series { get; set; }
         public string? RpgSystem { get; set; }
+        public bool isPublished { get; set; }
         public ICollection<string>? Tags { get; set; }
         public ICollection<string>? Items { get; set; }
     }

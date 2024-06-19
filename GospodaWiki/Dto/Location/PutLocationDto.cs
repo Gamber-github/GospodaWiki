@@ -1,6 +1,6 @@
 ﻿namespace GospodaWiki.Dto.Location
 {
-    public class PatchLocationDto
+    public class PutLocationDto
     {
         public string? Name { get; set; }
         public string? Address { get; set; }

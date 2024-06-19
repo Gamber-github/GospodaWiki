@@ -11,5 +11,6 @@
         public int? RpgSystemId { get; set; }
         public RpgSystem? RpgSystem { get; set; }
         public string? YoutubePlaylistId { get; set; }
+        public bool isPublished { get; set; } = false;
     }
 }

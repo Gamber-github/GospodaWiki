@@ -8,5 +8,6 @@
         public string? City { get; set; }
         public string? LocationURL { get; set; }
         public ICollection<Event>? Events { get; set; }
+        public bool isPublished { get; set; } = false;
     }
 }

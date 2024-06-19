@@ -6,7 +6,7 @@ using GospodaWiki.Dto.Character;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class CharacterController : Controller
     {
@@ -20,31 +20,38 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<CharactersDto>))]
-        public IActionResult GetChatacters()
+        public IActionResult GetUnpublishedCharacters()
         {
-            var characters = _mapper.Map<List<CharactersDto>>(_characterRepository.GetCharacters());
+            var characters = _mapper.Map<List<CharactersDto>>(_characterRepository.GetUnpublishedCharacters());
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
             return Ok(characters);
         }
 
         [HttpGet("{characterId}")]
         [ProducesResponseType(200, Type = typeof(CharacterDetailsDto))]
         [ProducesResponseType(400)]
-        public IActionResult GetCharacter(int characterId)
+
+        public IActionResult GetUnpublishedCharacter(int characterId)
         {
             if (!_characterRepository.CharacterExists(characterId))
             {
                 return NotFound();
             }
 
-            var character = _mapper.Map<CharacterDetailsDto>(_characterRepository.GetCharacter(characterId));
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            var character = _mapper.Map<CharacterDetailsDto>(_characterRepository.GetUnpublishedCharacter(characterId));
+
+            if (character == null)
+            {
+                return NotFound();
             }
 
             return Ok(character);
@@ -70,7 +77,7 @@ namespace GospodaWiki.Controllers
             if (character != null)
             {
                 ModelState.AddModelError("", $"Character {characterCreate.FirstName} {characterCreate.LastName} already exists");
-                return StatusCode(422,ModelState);
+                return StatusCode(422, ModelState);
             }
 
             var characterMap = _mapper.Map<PostCharacterDto>(characterCreate);
@@ -83,32 +90,57 @@ namespace GospodaWiki.Controllers
 
             return Ok("Succesfully Created");
         }
-        [HttpPatch]
+
+        [HttpPut("{characterId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
 
-        public async Task<IActionResult> UpdateCharacter([FromRoute] int characterId,[FromBody] PatchCharacterDto characterUpdate)
+        public IActionResult UpdateCharacter([FromRoute] int characterId,[FromBody] PutCharacterDto updatedCharacter)
         {
-            if (characterUpdate == null || ModelState.IsValid == false)
+            if (updatedCharacter == null )
             {
                 return BadRequest(ModelState);
             }
 
-            if (!_characterRepository.CharacterExists(characterId))
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", $"Character {characterUpdate.FirstName} {characterUpdate.LastName} was not found");
-                return NotFound(ModelState);
+                return BadRequest();
             }
 
-            var characterMap = _mapper.Map<PatchCharacterDto>(characterUpdate);
-
-            if (!await _characterRepository.UpdateCharacter(characterMap, characterId))
+            if (!_characterRepository.CharacterExists(characterId))
             {
-                ModelState.AddModelError("", $"Something went wrong updating the character {characterUpdate.FirstName} {characterUpdate.LastName}");
+                return NotFound();
+            }
+
+            var characterMap = _mapper.Map<PutCharacterDto>(updatedCharacter);
+
+            if (! _characterRepository.UpdateCharacter(characterMap, characterId))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating the character {updatedCharacter.FirstName} {updatedCharacter.LastName}");
                 return StatusCode(500, ModelState);
             }
 
             return Ok("Succesfully Updated");
+        }
+
+        [HttpPatch("{characterId}/publish")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult PublishCharacter([FromRoute] int characterId)
+        {
+            if (!_characterRepository.CharacterExists(characterId))
+            {
+                ModelState.AddModelError("", $"Something went wrong.");
+                return NotFound(ModelState);
+            }
+
+            if (!_characterRepository.PublishCharacter(characterId))
+            {
+                ModelState.AddModelError("", $"Something went wrong publishing the character.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully Published");
         }
     }
 }

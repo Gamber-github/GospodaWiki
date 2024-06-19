@@ -20,20 +20,21 @@ namespace GospodaWiki.Helper
             CreateMap<CharactersDto, Character>();
             CreateMap<Character, CharactersDto>();
             CreateMap<PostCharacterDto, Character>();
+            CreateMap<PutCharacterDto, Character>();
 
             CreateMap<PostCharacterDto, Character>();
 
-            CreateMap<RpgSystem, RpgSystemsDto>();
-            CreateMap<RpgSystemsDto, RpgSystem>();
+            CreateMap<RpgSystem, GetRpgSystemsDto>();
+            CreateMap<GetRpgSystemsDto, RpgSystem>();
 
             CreateMap<PostRpgSystemDto, RpgSystem>();
-            CreateMap<RpgSystemDetailsDto, RpgSystem>();
-            CreateMap<PatchRpgSystemDto, RpgSystem>();
+            CreateMap<GetRpgSystemDetailsDto, RpgSystem>();
+            CreateMap<PutRpgSystemDto, RpgSystem>();
 
             CreateMap<EventDetailsDto, Event>();
             CreateMap<EventsDto, Event>();
             CreateMap<PostEventDto, Event>();
-            CreateMap<PatchEventDto, Event>();
+            CreateMap<PutEventDto, Event>();
 
             CreateMap<Player, PlayerDto>();
             CreateMap<PlayerDto, Player>();
@@ -41,11 +42,11 @@ namespace GospodaWiki.Helper
             CreateMap<Location, LocationDetailsDto>();
             CreateMap<LocationDetailsDto, Location>();
             CreateMap<PostLocationDto, Location>();
-            CreateMap<PatchLocationDto, Location>();
+            CreateMap<PutLocationDto, Location>();
 
-            CreateMap<Series, SeriesDto>();
-            CreateMap<SeriesDto, Series>();
-            CreateMap<SeriesDetailsDto, Series>();
+            CreateMap<Series, GetSeriesDto>();
+            CreateMap<GetSeriesDto, Series>();
+            CreateMap<GetSeriesDetailsDto, Series>();
             CreateMap<PostSeriesDto, Series>();
 
             CreateMap<TagDetailsDto, Tag>();
