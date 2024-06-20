@@ -1,5 +1,6 @@
 ﻿using GospodaWiki.Data;
 using GospodaWiki.Dto.Character;
+using GospodaWiki.Dto.Player;
 using GospodaWiki.Dto.Series;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
@@ -32,7 +33,7 @@ namespace GospodaWiki.Repository
                     SeriesId = s.SeriesId,
                     Name = s.Name,
                     Description = s.Description,
-                    Players = players.Select(p => new Dto.PlayerDto
+                    Players = players.Select(p => new GetPlayerDetailsDto
                     {
                         PlayerId = p.PlayerId,
                         FirstName = p.FirstName,
@@ -78,7 +79,7 @@ namespace GospodaWiki.Repository
                 SeriesId = seriesContext.SeriesId,
                 Name = seriesContext.Name,
                 Description = seriesContext.Description,
-                Players = players.Select(p => new Dto.PlayerDto
+                Players = players.Select(p => new GetPlayerDetailsDto
                 {
                     PlayerId = p.PlayerId,
                     FirstName = p.FirstName,
@@ -221,7 +222,7 @@ namespace GospodaWiki.Repository
                     SeriesId = s.SeriesId,
                     Name = s.Name,
                     Description = s.Description,
-                    Players = players.Select(p => new Dto.PlayerDto
+                    Players = players.Select(p => new GetPlayerDetailsDto
                     {
                         PlayerId = p.PlayerId,
                         FirstName = p.FirstName,
@@ -259,7 +260,7 @@ namespace GospodaWiki.Repository
                 SeriesId = seriesContext.SeriesId,
                 Name = seriesContext.Name,
                 Description = seriesContext.Description,
-                Players = players.Select(p => new Dto.PlayerDto
+                Players = players.Select(p => new GetPlayerDetailsDto
                 {
                     PlayerId = p.PlayerId,
                     FirstName = p.FirstName,

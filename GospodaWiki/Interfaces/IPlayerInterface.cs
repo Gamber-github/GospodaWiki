@@ -1,14 +1,18 @@
-﻿using GospodaWiki.Models;
+﻿using GospodaWiki.Dto.Player;
+using GospodaWiki.Models;
 
 namespace GospodaWiki.Interfaces
 {
     public interface IPlayerInterface
     {
-        public ICollection<Player> GetPlayers();
-        public Player GetPlayer(int id);
-        public Player GetPlayer(string name);
+        public ICollection<GetPlayersDto> GetPlayers();
+        public ICollection<GetPlayersDto> GetUnpublishedPlayers();
+        public GetPlayerDetailsDto GetPlayer(int id);
+        public GetPlayerDetailsDto GetUnpublishedPlayer(int playerId);
         public bool PlayerExists(int playerId);
-        public bool CreatePlayer(Player player);
+        public bool CreatePlayer(PostPlayerDto player);
+        public bool UpdatePlayer(PutPlayerDto player, int playerId);
+        public bool PublishPlayer(int playerId);
         public bool Save();
     }
 }

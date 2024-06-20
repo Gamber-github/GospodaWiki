@@ -1,6 +1,4 @@
-﻿using GospodaWiki.Models;
-
-namespace GospodaWiki.Dto.Character
+﻿namespace GospodaWiki.Dto.Character
 {
     public class CharactersDto
     {
