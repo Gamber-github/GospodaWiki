@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Dto.RpgSystem;
+﻿using GospodaWiki.Dto.Player;
+using GospodaWiki.Dto.RpgSystem;
 
 namespace GospodaWiki.Dto.Series
 {
@@ -8,7 +9,7 @@ namespace GospodaWiki.Dto.Series
         public string? Name { get; set; }
         public string? Description { get; set; }
         public ICollection<string>? Tags { get; set; }
-        public ICollection<PlayerDto>? Players { get; set; }
+        public ICollection<GetPlayerDetailsDto>? Players { get; set; }
         public ICollection<GospodaWiki.Dto.Character.CharacterDetailsDto>? Characters { get; set; }
         public GetRpgSystemsDto? RpgSystem { get; set; }
         public string? YoutubePlaylistId { get; set; }

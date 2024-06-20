@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using GospodaWiki.Dto;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Dto.Location;
+using GospodaWiki.Dto.Player;
 using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Dto.Series;
 using GospodaWiki.Dto.Tag;
@@ -36,8 +36,10 @@ namespace GospodaWiki.Helper
             CreateMap<PostEventDto, Event>();
             CreateMap<PutEventDto, Event>();
 
-            CreateMap<Player, PlayerDto>();
-            CreateMap<PlayerDto, Player>();
+            CreateMap<Player, GetPlayerDetailsDto>();
+            CreateMap<GetPlayerDetailsDto, Player>();
+            CreateMap<PostCharacterDto, Player>();
+            CreateMap<PutPlayerDto, Player>();
 
             CreateMap<Location, LocationDetailsDto>();
             CreateMap<LocationDetailsDto, Location>();
@@ -50,6 +52,7 @@ namespace GospodaWiki.Helper
             CreateMap<PostSeriesDto, Series>();
 
             CreateMap<TagDetailsDto, Tag>();
+
         }
     }
 }

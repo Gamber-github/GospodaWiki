@@ -55,7 +55,12 @@ namespace GospodaWiki.Repository
         }
         public CharacterDetailsDto GetCharacter(int id)
         {
-            var character = _context.Characters.FirstOrDefault(p => p.CharacterId == id && p.isPublished);
+            var character = _context.Characters
+                .Include(c => c.Series)
+                .Include(c => c.RpgSystem)
+                .Include(c => c.Tags)
+                .Include(c => c.Items)
+                .FirstOrDefault(p => p.CharacterId == id && p.isPublished);
 
             if (character == null)
             {

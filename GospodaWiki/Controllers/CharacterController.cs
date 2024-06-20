@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using GospodaWiki.Interfaces;
-using GospodaWiki.Models;
 using AutoMapper;
 using GospodaWiki.Dto.Character;
 
@@ -94,17 +93,18 @@ namespace GospodaWiki.Controllers
         [HttpPut("{characterId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
 
         public IActionResult UpdateCharacter([FromRoute] int characterId,[FromBody] PutCharacterDto updatedCharacter)
         {
             if (updatedCharacter == null )
             {
-                return BadRequest(ModelState);
+                return BadRequest();
             }
 
             if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
             if (!_characterRepository.CharacterExists(characterId))
