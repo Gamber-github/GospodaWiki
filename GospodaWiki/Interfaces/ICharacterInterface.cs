@@ -1,6 +1,4 @@
 ﻿using GospodaWiki.Dto.Character;
-using GospodaWiki.Models;
-
 namespace GospodaWiki.Interfaces
 {
     public interface ICharacterInterface

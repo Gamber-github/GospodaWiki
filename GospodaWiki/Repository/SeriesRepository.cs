@@ -18,15 +18,17 @@ namespace GospodaWiki.Repository
         }
         public ICollection<GetSeriesDto> GetSeries()
         {
-            var series = _context.Series.Where(s => s.isPublished).ToList();
+            var series = _context.Series
+                .Where(s => s.isPublished)
+                .ToList();
             var seriesDto = new List<GetSeriesDto>();
 
             foreach (var s in series)
             {
-                var characters = _context.Characters.Where(c => c.SeriesId == s.SeriesId && c.isPublished);
-                var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == s.SeriesId && s.isPublished));
-                var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == s.RpgSystemId && r.isPublished);
-                var players = _context.Players.Where(p => p.Series.Any(s => s.SeriesId == s.SeriesId && s.isPublished));
+                var characters = _context.Characters.Where(c => c.SeriesId == s.SeriesId);
+                var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == s.SeriesId));
+                var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == s.RpgSystemId);
+                var players = _context.Players.Where(p => p.Series.Any(s => s.SeriesId == s.SeriesId));
 
                 seriesDto.Add(new GetSeriesDto
                 {
@@ -37,38 +39,71 @@ namespace GospodaWiki.Repository
                     {
                         PlayerId = p.PlayerId,
                         FirstName = p.FirstName,
-                        LastName = p.LastName,    
-                        isPublished = p.isPublished
+                        LastName = p.LastName
                     }).ToList(),
                     Characters = characters.Select(c => new CharacterDetailsDto
                     {
                         CharacterId = c.CharacterId,
                         FirstName = c.FirstName,
                         LastName = c.LastName,
-                        isPublished = c.isPublished
                     }).ToList(),
                     Tags = tags.Select(t => t.Name).ToList(),
                     RpgSystem = rpgSystem != null? new Dto.RpgSystem.GetRpgSystemsDto
                     {
                         RpgSystemId = rpgSystem.RpgSystemId,
-                        Name = rpgSystem.Name,
-                        isPublished = rpgSystem.isPublished
+                        Name = rpgSystem.Name
                     }: new Dto.RpgSystem.GetRpgSystemsDto(),
-                    YoutubePlaylistId = s.YoutubePlaylistId,
-                    isPublished = s.isPublished
+                    YoutubePlaylistId = s.YoutubePlaylistId
                 });
             }
             return seriesDto;
         }
+        public ICollection<GetSeriesDto> GetUnpublishedSeries()
+        {
+            var series = _context.Series
+                .ToList();
+            var seriesDto = new List<GetSeriesDto>();
 
+            foreach (var s in series)
+            {
+                var characters = _context.Characters.Where(c => c.SeriesId == s.SeriesId);
+                var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == s.SeriesId));
+                var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == s.RpgSystemId);
+                var players = _context.Players.Where(p => p.Series.Any(s => s.SeriesId == s.SeriesId));
+
+                seriesDto.Add(new GetSeriesDto
+                {
+                    SeriesId = s.SeriesId,
+                    Name = s.Name,
+                    Description = s.Description,
+                    Players = players.Select(p => new GetPlayerDetailsDto
+                    {
+                        PlayerId = p.PlayerId,
+                        FirstName = p.FirstName,
+                        LastName = p.LastName
+                    }).ToList(),
+                    Characters = characters.Select(c => new CharacterDetailsDto
+                    {
+                        CharacterId = c.CharacterId,
+                        FirstName = c.FirstName,
+                        LastName = c.LastName,
+                    }).ToList(),
+                    Tags = tags.Select(t => t.Name).ToList(),
+                    RpgSystem = rpgSystem != null ? new Dto.RpgSystem.GetRpgSystemsDto
+                    {
+                        RpgSystemId = rpgSystem.RpgSystemId,
+                        Name = rpgSystem.Name
+                    } : new Dto.RpgSystem.GetRpgSystemsDto(),
+                    YoutubePlaylistId = s.YoutubePlaylistId
+                });
+            }
+            return seriesDto;
+        }
         public GetSeriesDetailsDto GetSeriesById(int seriesid)
         {
-            var seriesContext = _context.Series.FirstOrDefault(s => s.SeriesId == seriesid && s.isPublished);
-            if (seriesContext == null)
-                {
-                return null;
-            }
-
+            var seriesContext = _context.Series
+                .Where(s => s.isPublished)
+                .FirstOrDefault(s => s.SeriesId == seriesid);
             var characters = _context.Characters.Where(c => c.SeriesId == seriesContext.SeriesId);
             var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == seriesContext.SeriesId));
             var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == seriesContext.RpgSystemId);
@@ -91,7 +126,7 @@ namespace GospodaWiki.Repository
                     FirstName = c.FirstName,
                     LastName = c.LastName,
                 }).ToList(),
-                Tags = tags.Select(t => new Dto.Tag.TagDetailsDto
+                Tags = tags.Select(t => new Dto.Tag.GetTagDetailsDto
                 {
                     TagId = t.TagId,
                     Name = t.Name
@@ -101,21 +136,55 @@ namespace GospodaWiki.Repository
                     RpgSystemId = rpgSystem.RpgSystemId,
                     Name = rpgSystem.Name
                 }: new Dto.RpgSystem.GetRpgSystemsDto(),
-                YoutubePlaylistId = seriesContext.YoutubePlaylistId,
-                isPublished = seriesContext.isPublished
+                YoutubePlaylistId = seriesContext.YoutubePlaylistId
             };
         }
+        public GetSeriesDetailsDto GetUnpublishedSeriesById (int seriesId)
+        {
+            var seriesContext = _context.Series.FirstOrDefault(s => s.SeriesId == seriesId);
+            var characters = _context.Characters.Where(c => c.SeriesId == seriesContext.SeriesId);
+            var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == seriesContext.SeriesId));
+            var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == seriesContext.RpgSystemId);
+            var players = _context.Players.Where(p => p.Series.Any(s => s.SeriesId == seriesContext.SeriesId));
 
+            return new GetSeriesDetailsDto
+            {
+                SeriesId = seriesContext.SeriesId,
+                Name = seriesContext.Name,
+                Description = seriesContext.Description,
+                Players = players.Select(p => new GetPlayerDetailsDto
+                {
+                    PlayerId = p.PlayerId,
+                    FirstName = p.FirstName,
+                    LastName = p.LastName
+                }).ToList(),
+                Characters = characters.Select(c => new CharacterDetailsDto
+                {
+                    CharacterId = c.CharacterId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                }).ToList(),
+                Tags = tags.Select(t => new Dto.Tag.GetTagDetailsDto
+                {
+                    TagId = t.TagId,
+                    Name = t.Name
+                }).ToList(),
+                RpgSystem = rpgSystem != null ? new Dto.RpgSystem.GetRpgSystemsDto
+                {
+                    RpgSystemId = rpgSystem.RpgSystemId,
+                    Name = rpgSystem.Name
+                } : new Dto.RpgSystem.GetRpgSystemsDto(),
+                YoutubePlaylistId = seriesContext.YoutubePlaylistId
+            };
+        }
         public bool SeriesExists(int seriesId)
         {
             return _context.Series.Any(s => s.SeriesId == seriesId);
         }
-
         public bool Save()
         {
             return _context.SaveChanges() >= 0;
         }
-
         public bool CreateSeries(PostSeriesDto seriesCreate)
         {
             if (seriesCreate == null)
@@ -155,135 +224,61 @@ namespace GospodaWiki.Repository
                 throw new ArgumentNullException(nameof(seriesToUpdate));
             }
 
-            seriesContext.Tags.Clear();
-            seriesContext.Players.Clear();
-            seriesContext.Characters.Clear();
+            seriesContext.Name = seriesToUpdate.Name ?? seriesContext.Name;
+            seriesContext.Description = seriesToUpdate.Description ?? seriesContext.Description;
+            seriesContext.RpgSystemId = seriesToUpdate.RpgSystemId ?? seriesContext.RpgSystemId;
+            seriesContext.YoutubePlaylistId = seriesToUpdate.YoutubePlaylistId ?? seriesContext.YoutubePlaylistId;
 
-            seriesContext.Name = seriesToUpdate.Name;
-            seriesContext.Description = seriesToUpdate.Description;
-            seriesContext.RpgSystemId = seriesToUpdate.RpgSystemId;
-            seriesContext.YoutubePlaylistId = seriesToUpdate.YoutubePlaylistId;
-
-            var tags = _context.Tags.Where(t => seriesToUpdate.TagsId.Contains(t.TagId)).ToList();
-
-            foreach (var tag in tags)
+            if (seriesToUpdate.TagsId != null)
             {
-                seriesContext.Tags.Add(tag);
+                seriesContext.Tags?.Clear();
+                if(seriesToUpdate.TagsId.Any())
+                {
+                    var tags = _context.Tags
+                        .Where(t => seriesToUpdate.TagsId.Contains(t.TagId))
+                        .ToList();
+                    seriesContext.Tags = tags;
+                }
             }
 
-            var players = _context.Players.Where(p => seriesToUpdate.PlayersId.Contains(p.PlayerId)).ToList();
-
-            foreach (var player in players)
+            if(seriesToUpdate.PlayersId != null)
             {
-                seriesContext.Players.Add(player);
+                seriesContext.Players?.Clear();
+                if(seriesToUpdate.PlayersId.Any())
+                {
+                    var players = _context.Players
+                        .Where(p => seriesToUpdate.PlayersId.Contains(p.PlayerId))
+                        .ToList();
+                    seriesContext.Players = players;
+                }
             }
-            
-            var characters = _context.Characters.Where(c => seriesToUpdate.CharactersId.Contains(c.CharacterId)).ToList();
 
-            foreach (var character in characters)
+            if(seriesToUpdate.CharactersId != null)
             {
-                seriesContext.Characters.Add(character);  
+                seriesContext.Characters?.Clear();
+                if(seriesToUpdate.CharactersId.Any())
+                {
+                    var characters = _context.Characters
+                        .Where(c => seriesToUpdate.CharactersId.Contains(c.CharacterId))
+                        .ToList();
+                    seriesContext.Characters = characters;
+                }
             }
 
             _context.Series.Update(seriesContext);
-            return  Save();
+            return Save();
         }
         public bool PublishSeries(int seriesId)
         {
-            var series = _context.Series
-                .Include(s => s.Tags)
-                .Include(s => s.Players)
-                .Include(s => s.Characters)
-                .FirstOrDefault(s => s.SeriesId == seriesId);
-
-            if (series == null)
-            {
-                throw new ArgumentNullException(nameof(series));
-            }
-
-            series.isPublished = true;
-            return Save();
-        }
-
-        public ICollection<GetSeriesDto> GetUnpublishedSeries()
-        {
-            var series = _context.Series.ToList();
-            var seriesDto = new List<GetSeriesDto>();
-
-            foreach (var s in series)
-            {
-                var characters = _context.Characters.Where(c => c.SeriesId == s.SeriesId );
-                var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == s.SeriesId));
-                var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == s.RpgSystemId);
-                var players = _context.Players.Where(p => p.Series.Any(s => s.SeriesId == s.SeriesId));
-
-                seriesDto.Add(new GetSeriesDto
-                {
-                    SeriesId = s.SeriesId,
-                    Name = s.Name,
-                    Description = s.Description,
-                    Players = players.Select(p => new GetPlayerDetailsDto
-                    {
-                        PlayerId = p.PlayerId,
-                        FirstName = p.FirstName,
-                        LastName = p.LastName
-                        
-                    }).ToList(),
-                    Characters = characters.Select(c => new CharacterDetailsDto
-                    {
-                        CharacterId = c.CharacterId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName,
-                    }).ToList(),
-                    Tags = tags.Select(t => t.Name).ToList(),
-                    RpgSystem = rpgSystem != null ? new Dto.RpgSystem.GetRpgSystemsDto
-                    {
-                        RpgSystemId = rpgSystem.RpgSystemId,
-                        Name = rpgSystem.Name
-                    } : new Dto.RpgSystem.GetRpgSystemsDto(),
-                    YoutubePlaylistId = s.YoutubePlaylistId
-                });
-            }
-            return seriesDto;
-        }
-
-        public GetSeriesDetailsDto GetUnpublishedSeriesById(int seriesId)
-        {
             var seriesContext = _context.Series.FirstOrDefault(s => s.SeriesId == seriesId);
-            var characters = _context.Characters.Where(c => c.SeriesId == seriesContext.SeriesId);
-            var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == seriesContext.SeriesId));
-            var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == seriesContext.RpgSystemId);
-            var players = _context.Players.Where(p => p.Series.Any(s => s.SeriesId == seriesContext.SeriesId));
-
-            return new GetSeriesDetailsDto
+            if (seriesContext == null)
             {
-                SeriesId = seriesContext.SeriesId,
-                Name = seriesContext.Name,
-                Description = seriesContext.Description,
-                Players = players.Select(p => new GetPlayerDetailsDto
-                {
-                    PlayerId = p.PlayerId,
-                    FirstName = p.FirstName,
-                    LastName = p.LastName
-                }).ToList(),
-                Characters = characters.Select(c => new CharacterDetailsDto
-                {
-                    CharacterId = c.CharacterId,
-                    FirstName = c.FirstName,
-                    LastName = c.LastName,
-                }).ToList(),
-                Tags = tags.Select(t => new Dto.Tag.TagDetailsDto
-                {
-                    TagId = t.TagId,
-                    Name = t.Name
-                }).ToList(),
-                RpgSystem = rpgSystem != null ? new Dto.RpgSystem.GetRpgSystemsDto
-                {
-                    RpgSystemId = rpgSystem.RpgSystemId,
-                    Name = rpgSystem.Name
-                } : new Dto.RpgSystem.GetRpgSystemsDto(),
-                YoutubePlaylistId = seriesContext.YoutubePlaylistId
-            };
+                return false;
+            }
+
+            seriesContext.isPublished = true;
+            _context.Series.Update(seriesContext);
+            return Save();
         }
     }
 }

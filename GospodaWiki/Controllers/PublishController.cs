@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Event;
+using GospodaWiki.Dto.Items;
 using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Dto.Series;
+using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +18,8 @@ namespace GospodaWiki.Controllers
         private readonly IEventInterface _eventRepository;
         private readonly IRpgSystemInterface _rpgSystemRepository;
         private readonly ISeriesInterface _seriesRepository;
+        private readonly ITagInterface _tagRepository;
+        private readonly IItemInterface _itemRepository;
         private readonly IMapper _mapper;
 
         public PublishedController(
@@ -23,26 +27,36 @@ namespace GospodaWiki.Controllers
             IEventInterface eventRepository, 
             IRpgSystemInterface rpgSystemRepository,
             ISeriesInterface seriesRepository,
-            IMapper mapper)
+            ITagInterface tagRepository,
+            IItemInterface itemRepository,
+            IMapper mapper
+            )
+
         {
             _characterRepository = characterRepository;
             _eventRepository = eventRepository;
             _rpgSystemRepository = rpgSystemRepository;
             _seriesRepository = seriesRepository;
+            _tagRepository = tagRepository;
+            _itemRepository = itemRepository;
             _mapper = mapper;
+
         }
 
         [HttpGet]
         [Route("/Characters")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<CharactersDto>))]
-        public IActionResult GetChatacters()
+        public IActionResult GetChatacters(int pageNumber = 1, int pageSize = 10)
         {
             var characters = _mapper.Map<List<CharactersDto>>(_characterRepository.GetCharacters());
+            var pagedCharacters = characters.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedCharacters = _mapper.Map<List<CharactersDto>>(pagedCharacters);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(characters);
+            return Ok(mappedCharacters);
         }
 
         [HttpGet("/Character/{characterId}")]
@@ -73,14 +87,17 @@ namespace GospodaWiki.Controllers
         [HttpGet("/Events")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<EventsDto>))]
         [ProducesResponseType(400)]
-        public IActionResult GetEvents()
+        public IActionResult GetEvents(int pageNumber = 1, int pageSize = 10)
         {      
             var events = _mapper.Map<List<EventsDto>>(_eventRepository.GetEvents());
+            var pagedEvents = events.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedEvents = _mapper.Map<List<EventsDto>>(pagedEvents);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(events);
+            return Ok(mappedEvents);
         }
 
         [HttpGet("/Event/{eventId}")]
@@ -106,14 +123,17 @@ namespace GospodaWiki.Controllers
         [HttpGet("/RpgSystems")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetRpgSystemsDto>))]
         [ProducesResponseType(400)]
-        public IActionResult GetRpgSystems()
+        public IActionResult GetRpgSystems(int pageNumber = 1, int pageSize = 10)
         {
             var rpgSystems = _mapper.Map<List<GetRpgSystemsDto>>(_rpgSystemRepository.GetRpgSystems());
+            var pagedRpgSystems = rpgSystems.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedRpgSystems = _mapper.Map<List<GetTagDetailsDto>>(pagedRpgSystems);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(rpgSystems);
+            return Ok(mappedRpgSystems);
         }
 
         [HttpGet("/RpgSystem/{rpgSystemId}")]
@@ -144,14 +164,17 @@ namespace GospodaWiki.Controllers
         [HttpGet("/Series")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetSeriesDto>))]
         [ProducesResponseType(400)]
-        public IActionResult GetSeries()
+        public IActionResult GetSeries(int pageNumber = 1, int pageSize = 10)
         {
             var series = _mapper.Map<List<GetSeriesDto>>(_seriesRepository.GetSeries());
+            var pagedSeries = series.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedSeries = _mapper.Map<List<GetTagDetailsDto>>(pagedSeries);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(series);
+            return Ok(mappedSeries);
         }
 
         [HttpGet("/Series/{seriesId}")]
@@ -176,6 +199,62 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok(series);
+        }
+
+        [HttpGet("/Tags")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetTagDetailsDto>))]
+        [ProducesResponseType(400)]
+        public IActionResult GetTags(int pageNumber = 1, int pageSize = 10)
+        {
+            var tags = _mapper.Map<List<GetTagDetailsDto>>(_tagRepository.GetTags());
+            var pagedTags = tags.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedTags = _mapper.Map<List<GetTagDetailsDto>>(pagedTags);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return Ok(mappedTags);
+        }
+
+        [HttpGet("/Items")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetItemsDto>))]
+        [ProducesResponseType(400)]
+        public IActionResult GetItems(int pageNumber = 1, int pageSize = 10)
+        {
+            var items = _mapper.Map<List<GetItemsDto>>(_itemRepository.GetItems());
+            var pagedItems = items.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedItems = _mapper.Map<List<GetItemsDto>>(pagedItems);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return Ok(mappedItems);
+        }
+        [HttpGet("/Item/{itemId}")]
+        [ProducesResponseType(200, Type = typeof(GetItemDetailsDto))]
+        [ProducesResponseType(400)]
+        public IActionResult GetItem(int itemId)
+        {
+            if (!_itemRepository.ItemExists(itemId))
+            {
+                return NotFound();
+            }
+
+            var item = _mapper.Map<GetItemDetailsDto>(_itemRepository.GetItem(itemId));
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if(item == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(item);
         }
     }
 }

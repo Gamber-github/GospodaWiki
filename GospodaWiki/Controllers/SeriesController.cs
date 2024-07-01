@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Series;
+using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
-using GospodaWiki.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -22,14 +22,17 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetSeriesDto>))]
-        public IActionResult GetUnpublishedSeries()
+        public IActionResult GetUnpublishedSeries(int pageNumber = 1, int pageSize = 10)
         {
             var series = _mapper.Map<List<GetSeriesDto>>(_seriesRepository.GetUnpublishedSeries());
+            var pagedSeries = series.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedSeries = _mapper.Map<List<GetTagDetailsDto>>(pagedSeries);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(series);
+            return Ok(mappedSeries);
         }
 
         [HttpGet("{seriesId}")]

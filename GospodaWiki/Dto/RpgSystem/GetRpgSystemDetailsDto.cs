@@ -12,7 +12,7 @@ namespace GospodaWiki.Dto.RpgSystem
         public string? ImagePath { get; set; }
         public string? StoryName { get; set; }
         public bool isPublished { get; set; }
-        public ICollection<TagDetailsDto>? Tags { get; set; }
+        public ICollection<GetTagDetailsDto>? Tags { get; set; }
         public ICollection<CharactersDto>? Characters { get; set; }
         public ICollection<string>? Series { get; set; }
     }

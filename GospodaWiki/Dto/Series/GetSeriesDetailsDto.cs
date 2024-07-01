@@ -8,7 +8,7 @@ namespace GospodaWiki.Dto.Series
         public int SeriesId { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public ICollection<TagDetailsDto>? Tags { get; set; }
+        public ICollection<GetTagDetailsDto>? Tags { get; set; }
         public ICollection<GetPlayerDetailsDto>? Players { get; set; }
         public ICollection<GospodaWiki.Dto.Character.CharacterDetailsDto>? Characters { get; set; }
         public int? RpgSystemId { get; set; }

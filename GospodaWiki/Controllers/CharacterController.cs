@@ -19,15 +19,18 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<CharactersDto>))]
-        public IActionResult GetUnpublishedCharacters()
+        public IActionResult GetUnpublishedCharacters(int pageNumber = 1, int pageSize = 10)
         {
             var characters = _mapper.Map<List<CharactersDto>>(_characterRepository.GetUnpublishedCharacters());
+            var pagedCharacters = characters.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedCharacters = _mapper.Map<List<CharactersDto>>(pagedCharacters);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok(characters);
+            return Ok(mappedCharacters);    
         }
 
         [HttpGet("{characterId}")]
