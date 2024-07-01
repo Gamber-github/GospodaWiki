@@ -5,15 +5,14 @@ namespace GospodaWiki.Interfaces
 {
     public interface IRpgSystemInterface
     {
-        ICollection<GetRpgSystemsDto> GetRpgSystems();
-        ICollection<GetRpgSystemsDto> GetUnpublishedRpgSystems();
-        GetRpgSystemDetailsDto GetRpgSystem(int rpgSystemId);
-        GetRpgSystemDetailsDto GetUnpublishedRpgSystem(int rpgSystemId);
-        bool RpgSystemExists(int rpgSystemId);
-        bool CreateRpgSystem(PostRpgSystemDto rpgSystem);
-        bool UpdateRpgSystem(PutRpgSystemDto rpgSystem, int rpgSystemId);
-        bool PublishRpgSystem (int rpgSystemId);
-        bool Save();
-        Task<bool> SaveAsync();
+        public ICollection<GetRpgSystemsDto> GetRpgSystems();
+        public ICollection<GetRpgSystemsDto> GetUnpublishedRpgSystems();
+        public GetRpgSystemDetailsDto GetRpgSystem(int rpgSystemId);
+        public GetRpgSystemDetailsDto GetUnpublishedRpgSystem(int rpgSystemId);
+        public bool RpgSystemExists(int rpgSystemId);
+        public bool CreateRpgSystem(PostRpgSystemDto rpgSystem);
+        public bool UpdateRpgSystem(PutRpgSystemDto rpgSystem, int rpgSystemId);
+        public bool PublishRpgSystem (int rpgSystemId);
+        public bool Save();
     }
 }

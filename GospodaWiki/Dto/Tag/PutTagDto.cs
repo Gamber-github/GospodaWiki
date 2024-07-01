@@ -1,6 +1,6 @@
 ﻿namespace GospodaWiki.Dto.Tag
 {
-    public class TagDetailsDto
+    public class PutTagDto
     {
         public int TagId { get; set; }
         public string? Name { get; set; }

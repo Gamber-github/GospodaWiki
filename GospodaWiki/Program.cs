@@ -18,6 +18,8 @@ builder.Services.AddScoped<IEventInterface, EventRepository>();
 builder.Services.AddScoped<IPlayerInterface, PlayerRepository>();
 builder.Services.AddScoped<ILocationInterface, LocationRepository>();
 builder.Services.AddScoped<ISeriesInterface, SeriesRepository>();
+builder.Services.AddScoped<ITagInterface, TagRepository>();
+builder.Services.AddScoped<IItemInterface, ItemRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

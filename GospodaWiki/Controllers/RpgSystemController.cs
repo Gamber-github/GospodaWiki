@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.RpgSystem;
+using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -20,14 +21,17 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetRpgSystemsDto>))]
-        public IActionResult GetUnpublishedRpgSystems()
+        public IActionResult GetUnpublishedRpgSystems(int pageNumber = 1, int pageSize = 10)
         {
             var rpgSystems = _mapper.Map<List<GetRpgSystemsDto>>(_rpgSystemRepository.GetUnpublishedRpgSystems());
+            var pagedRpgSystems = rpgSystems.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedRpgSystems = _mapper.Map<List<GetTagDetailsDto>>(pagedRpgSystems);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(rpgSystems);
+            return Ok(mappedRpgSystems);
         }
 
         [HttpGet("{rpgSystemId}")]

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Player;
+using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +22,17 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetPlayersDto>))]
-        public IActionResult GetUnpublishedPlayers()
+        public IActionResult GetUnpublishedPlayers(int pageNumber = 1, int pageSize = 10)
         {
             var players = _mapper.Map<List<GetPlayersDto>>(_playerRepository.GetUnpublishedPlayers());
+            var pagedPlayers = players.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedPlayers = _mapper.Map<List<GetTagDetailsDto>>(pagedPlayers);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(players);
+            return Ok(mappedPlayers);
         }
 
         [HttpGet("{playerId}")]

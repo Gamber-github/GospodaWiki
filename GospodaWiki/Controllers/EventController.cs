@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
+using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Interfaces;
+using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class EventController : Controller
     {
@@ -19,14 +21,17 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<EventsDto>))]
-        public IActionResult GetUnpublishedEvents()
+        public IActionResult GetUnpublishedEvents(int pageNumber = 1, int pageSize = 10)
         {
             var events = _mapper.Map<List<EventsDto>>(_eventRepository.GetUnpublishedEvents());
+            var pagedEvents = events.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedEvents = _mapper.Map<List<EventsDto>>(pagedEvents);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(events);
+            return Ok(mappedEvents);
         }
 
         [HttpGet("{eventId}")]

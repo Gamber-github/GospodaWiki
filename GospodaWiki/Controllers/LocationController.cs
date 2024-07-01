@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Location;
+using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
+using GospodaWiki.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -21,7 +23,7 @@ namespace GospodaWiki.Controllers
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(LocationDetailsDto))]
         [ProducesResponseType(400)]
-        public IActionResult GetUnpublishedLocations()
+        public IActionResult GetUnpublishedLocations(int pageNumber = 1, int pageSize = 10)
         {
             if (!ModelState.IsValid)
             {
@@ -29,8 +31,10 @@ namespace GospodaWiki.Controllers
             }
 
             var locations = _locationRepository.GetUnpublishedLocations();
+            var pagedLocations = locations.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedLocations = _mapper.Map<List<GetTagDetailsDto>>(pagedLocations);
 
-            return Ok(locations);
+            return Ok(mappedLocations);
         }
 
         [HttpGet("{locationId}")]
