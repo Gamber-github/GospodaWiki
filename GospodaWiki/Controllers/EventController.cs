@@ -3,6 +3,7 @@ using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -20,6 +21,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<EventsDto>))]
         public IActionResult GetUnpublishedEvents(int pageNumber = 1, int pageSize = 10)
         {
@@ -35,6 +37,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{eventId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(EventDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedEvent(int eventId)
@@ -55,6 +58,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateEvent([FromBody] PostEventDto eventCreate)
@@ -76,6 +80,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{eventId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
@@ -113,6 +118,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{eventId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<IActionResult> PublishEvent([FromRoute] int eventId)

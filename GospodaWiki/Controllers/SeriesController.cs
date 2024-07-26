@@ -3,6 +3,7 @@ using GospodaWiki.Dto.Series;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -21,6 +22,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetSeriesDto>))]
         public IActionResult GetUnpublishedSeries(int pageNumber = 1, int pageSize = 10)
         {
@@ -36,6 +38,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{seriesId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(GetSeriesDetailsDto))]
         public IActionResult GetUnpublishedSeriesById(int seriesId)
         {
@@ -53,6 +56,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateSeries([FromBody] PostSeriesDto seriesCreate)
@@ -87,6 +91,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{seriesId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult UpdateSeries([FromBody] PutSeriesDto seriesUpdate, [FromRoute] int seriesId)
@@ -114,6 +119,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{seriesId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishSeries([FromRoute] int seriesId)

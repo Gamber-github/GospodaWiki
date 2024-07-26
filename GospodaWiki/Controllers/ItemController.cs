@@ -3,6 +3,7 @@ using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Items;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -20,6 +21,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetItemsDto>))]
         public IActionResult GetUnpublishedItems(int pageNumber = 1, int pageSize = 10)
         {
@@ -36,6 +38,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{itemId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(GetItemDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedItem(int itemId)
@@ -61,6 +64,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204, Type = typeof(PostItemDto))]
         [ProducesResponseType(400)]
         public IActionResult CreateItem([FromBody] PostItemDto itemCreate)
@@ -87,6 +91,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{itemId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult UpdateItem([FromRoute] int itemId, [FromBody] PutItemDto itemUpdate)
@@ -116,6 +121,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{itemId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishItem([FromRoute] int itemId)

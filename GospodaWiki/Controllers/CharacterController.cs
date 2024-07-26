@@ -2,6 +2,7 @@
 using GospodaWiki.Interfaces;
 using AutoMapper;
 using GospodaWiki.Dto.Character;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GospodaWiki.Controllers
 {
@@ -18,6 +19,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<CharactersDto>))]
         public IActionResult GetUnpublishedCharacters(int pageNumber = 1, int pageSize = 10)
         {
@@ -34,6 +36,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{characterId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(CharacterDetailsDto))]
         [ProducesResponseType(400)]
 
@@ -60,6 +63,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateCharacter([FromBody] PostCharacterDto characterCreate)
@@ -94,6 +98,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{characterId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -127,6 +132,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{characterId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishCharacter([FromRoute] int characterId)

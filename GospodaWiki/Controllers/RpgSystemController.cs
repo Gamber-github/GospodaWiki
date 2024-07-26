@@ -3,6 +3,7 @@ using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -20,6 +21,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetRpgSystemsDto>))]
         public IActionResult GetUnpublishedRpgSystems(int pageNumber = 1, int pageSize = 10)
         {
@@ -35,6 +37,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("{rpgSystemId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(GetRpgSystemDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedRpgSystem(int rpgSystemId)
@@ -55,6 +58,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateRpgSystem([FromBody] PostRpgSystemDto rpgSystemCreate)
@@ -90,6 +94,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{rpgSystemId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
@@ -122,6 +127,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{rpgSystemId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         public IActionResult PublishRpgSystem(int rpgSystemId)

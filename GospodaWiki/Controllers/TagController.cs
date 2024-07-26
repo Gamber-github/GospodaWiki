@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -18,6 +19,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetTagDetailsDto>))]
         public IActionResult GetUnpublishedTags(int pageNumber = 1, int pageSize = 10)
         {
@@ -34,6 +36,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         public IActionResult CreateTag([FromBody] PutTagDto tag)
@@ -58,6 +61,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{tagId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult UpdateTag(int tagId, [FromBody] PutTagDto tag)
@@ -82,6 +86,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{tagId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishTag(int tagId)
