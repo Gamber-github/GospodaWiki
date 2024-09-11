@@ -6,6 +6,8 @@
         public string? Name { get; set; }
         public string? Description { get; set; }
         public ICollection<Tag>? Tags { get; set; }
+        public int? GameMasterId { get; set; }
+        public Player GameMaster { get; set; }
         public ICollection<Player>? Players { get; set; }
         public ICollection<Character>? Characters { get; set; }
         public int? RpgSystemId { get; set; }

@@ -18,8 +18,8 @@ namespace GospodaWiki.Helper
             CreateMap<Character, CharacterDetailsDto>();
             CreateMap<CharacterDetailsDto, Character>();
 
-            CreateMap<CharactersDto, Character>();
-            CreateMap<Character, CharactersDto>();
+            CreateMap<GetCharactersDto, Character>();
+            CreateMap<Character, GetCharactersDto>();
             CreateMap<PostCharacterDto, Character>();
 
             CreateMap<PostCharacterDto, Character>();
@@ -32,7 +32,7 @@ namespace GospodaWiki.Helper
             CreateMap<PutRpgSystemDto, RpgSystem>();
 
             CreateMap<EventDetailsDto, Event>();
-            CreateMap<EventsDto, Event>();
+            CreateMap<GetEventsDto, Event>();
             CreateMap<PostEventDto, Event>();
             CreateMap<PutEventDto, Event>();
 

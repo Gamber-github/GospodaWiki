@@ -8,7 +8,7 @@
         public string? ImagePath { get; set; }
         public Image? Image { get; set; }
         public string? StoryName { get; set; }
-        public Story? Story { get; set; }
+        public ICollection<Story>? Stories { get; set; }
         public ICollection<Tag>? Tags { get; set; }
         public ICollection<Character>? Characters { get; set; }
         public ICollection<Series>? Series { get; set; }

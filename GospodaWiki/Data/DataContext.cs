@@ -64,6 +64,10 @@ namespace GospodaWiki.Data
                 .HasMany(r => r.Series)
                 .WithOne(s => s.RpgSystem);
 
+            modelBuilder.Entity<RpgSystem>()
+                .HasMany(s => s.Stories)
+                .WithOne(s => s.RpgSystem);
+
             modelBuilder.Entity<Series>()
                 .HasMany(s => s.Tags)
                 .WithMany(t => t.Series)
@@ -97,6 +101,10 @@ namespace GospodaWiki.Data
                 .HasMany(l => l.Events)
                 .WithOne(l => l.Location);
 
+            modelBuilder.Entity<Series>()
+                .HasOne(s => s.GameMaster)
+                .WithMany()
+                .HasForeignKey(s => s.GameMasterId);
         }
     }
 }

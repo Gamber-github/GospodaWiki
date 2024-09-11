@@ -22,18 +22,27 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [Authorize]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<EventsDto>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetEventsDto>))]
         public IActionResult GetUnpublishedEvents(int pageNumber = 1, int pageSize = 10)
         {
-            var events = _mapper.Map<List<EventsDto>>(_eventRepository.GetUnpublishedEvents());
+            var events = _mapper.Map<List<GetEventsDto>>(_eventRepository.GetUnpublishedEvents());
             var pagedEvents = events.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedEvents = _mapper.Map<List<EventsDto>>(pagedEvents);
+            var mappedEvents = _mapper.Map<List<GetEventsDto>>(pagedEvents);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(mappedEvents);
+
+            var response = new EventDTOPagedListDTO
+            {
+                Items = (IEnumerable<GetEventsDto>)mappedEvents,
+                totalItemCount = events.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+            
+            return Ok(response);
         }
 
         [HttpGet("{eventId}")]
@@ -121,7 +130,7 @@ namespace GospodaWiki.Controllers
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> PublishEvent([FromRoute] int eventId)
+        public IActionResult PublishEvent([FromRoute] int eventId)
         {
             if (!_eventRepository.EventExists(eventId))
             {
@@ -129,13 +138,34 @@ namespace GospodaWiki.Controllers
                 return NotFound(ModelState);
             }
 
-            if (!await _eventRepository.PublishEvent(eventId))
+            if (! _eventRepository.PublishEvent(eventId))
             {
                 ModelState.AddModelError("", $"Something went wrong publishing the event with id {eventId}");
                 return StatusCode(500, ModelState);
             }
 
             return Ok("Successfully published");
+        }
+
+        [HttpDelete("{eventId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult DeleteEvent([FromRoute] int eventId)
+        {
+            if (!_eventRepository.EventExists(eventId))
+            {
+                ModelState.AddModelError("", $"Something went wrong.");
+                return NotFound(ModelState);
+            }
+
+            if (!_eventRepository.DeleteEvent(eventId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the event with id {eventId}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully deleted");
         }
     }
 }

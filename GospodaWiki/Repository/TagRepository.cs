@@ -30,6 +30,21 @@ namespace GospodaWiki.Repository
             return Save();
             
         }
+
+        public bool DeleteTag(int tagId)
+        {
+            var tag = _context.Tags
+                .FirstOrDefault(t => t.TagId == tagId);
+
+            if (tag == null)
+            {
+                return false;
+            }
+
+            _context.Tags.Remove(tag);
+            return Save();
+        }
+
         public ICollection<GetTagDetailsDto> GetTags()
         {
             var tags = _context.Tags
@@ -71,7 +86,7 @@ namespace GospodaWiki.Repository
                 return false;
             }
 
-            tag.isPublished = true;
+            tag.isPublished = !tag.isPublished;
             _context.Tags.Update(tag);
             return Save();
         }

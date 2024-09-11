@@ -1,4 +1,5 @@
 ﻿using GospodaWiki.Data;
+using GospodaWiki.Dto.Event;
 using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
@@ -15,14 +16,14 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<LocationsDto> GetLocations()
+        public ICollection<GetLocationsDto> GetLocations()
         {
             var locations = _context.Locations.Where(l => l.isPublished).ToList();
-            var locationsDto = new List<LocationsDto>();
+            var locationsDto = new List<GetLocationsDto>();
 
             foreach (var location in locations)
             {
-                locationsDto.Add(new LocationsDto
+                locationsDto.Add(new GetLocationsDto
                 {
                     LocationId = location.LocationId,
                     Name = location.Name,
@@ -35,14 +36,14 @@ namespace GospodaWiki.Repository
             
             return locationsDto;
         }
-        public ICollection<LocationsDto> GetUnpublishedLocations()
+        public ICollection<GetLocationsDto> GetUnpublishedLocations()
         {
             var locations = _context.Locations.ToList();
-            var locationsDto = new List<LocationsDto>();
+            var locationsDto = new List<GetLocationsDto>();
 
             foreach (var location in locations)
             {
-                locationsDto.Add(new LocationsDto
+                locationsDto.Add(new GetLocationsDto
                 {
                     LocationId = location.LocationId,
                     Name = location.Name,
@@ -57,36 +58,51 @@ namespace GospodaWiki.Repository
         }
         public LocationDetailsDto GetLocation(int locationId)
         {
-            var Location = _context.Locations.Where(l => l.LocationId == locationId && l.isPublished).FirstOrDefault();
-            var Events = _context.Events.Where(e => e.LocationId == locationId).Select(e => e.Name);
+            var locationContext = _context.Locations
+            .Include(l => l.Events)
+            .FirstOrDefault(l => l.LocationId == locationId && l.isPublished);
+        
+            var Events = _context.Events.Where(e => e.LocationId == locationContext.LocationId);    
 
             var locationDetailsDto = new LocationDetailsDto
             {
-                LocationId = Location.LocationId,
-                Name = Location.Name,
-                Address = Location.Address,
-                City = Location.City,
-                LocationURL = Location.LocationURL,
-                Events = Events.ToList(),
-                isPublished = Location.isPublished
+                LocationId = locationContext.LocationId,
+                Name = locationContext.Name,
+                Address = locationContext.Address,
+                City = locationContext.City,
+                LocationURL = locationContext.LocationURL,
+                Events = Events.Select(e => new Dto.Event.GetEventReferenceDto
+                {
+                    EventId
+                    = e.EventId,
+                    Name = e.Name
+                }).ToList(),
+                isPublished = locationContext.isPublished
             };
 
             return locationDetailsDto;
         }
         public LocationDetailsDto GetUnpublishedLocation(int locationId)
         {
-            var Location = _context.Locations.Where(l => l.LocationId == locationId).FirstOrDefault();
-            var Events = _context.Events.Where(e => e.LocationId == locationId).Select(e => e.Name);
+            var locationContext = _context.Locations
+                .Include(l => l.Events)
+                .FirstOrDefault(l => l.LocationId == locationId);
+
+            var Events = _context.Events.Where(e => e.LocationId == locationContext.LocationId);
 
             var locationDetailsDto = new LocationDetailsDto
             {
-                LocationId = Location.LocationId,
-                Name = Location.Name,
-                Address = Location.Address,
-                City = Location.City,
-                LocationURL = Location.LocationURL,
-                Events = Events.ToList(),
-                isPublished = Location.isPublished
+                LocationId = locationContext.LocationId,
+                Name = locationContext.Name,
+                Address = locationContext.Address,
+                City = locationContext.City,
+                LocationURL = locationContext.LocationURL,
+                Events = Events.Select(e => new Dto.Event.GetEventReferenceDto
+                {
+                    EventId = e.EventId,
+                    Name = e.Name
+                }).ToList(),
+                isPublished = locationContext.isPublished
             };
 
             return locationDetailsDto;
@@ -141,24 +157,35 @@ namespace GospodaWiki.Repository
             }
 
             var locationContext = await _context.Locations
+                .Include(l => l.Events)
                 .FirstOrDefaultAsync(l => l.LocationId == locationId);
 
             if(locationContext == null)
             {
                 throw new ArgumentNullException(nameof(locationToUpdate));
             }
-            var events = await _context.Events.Where(e => locationToUpdate.EventId.Contains(e.EventId)).ToListAsync();
+            var events = await _context.Events.Where(e => locationToUpdate.EventIds.Contains(e.EventId)).ToListAsync();
 
-            var locationDto =  new Location
+            if (locationToUpdate.EventIds != null)
             {
-                Name = locationToUpdate.Name,
-                Address = locationToUpdate.Address,
-                City = locationToUpdate.City,
-                LocationURL = locationToUpdate.LocationURL,
-                Events = events
-            };
+                locationContext.Events.Clear();
+                if (locationToUpdate.EventIds.Any())
+                {
+                    var @Events = _context.Events
+                        .Where(e => locationToUpdate.EventIds.Contains(e.EventId))
+                        .ToList();
 
-            _context.Locations.Update(locationDto);
+                    locationContext.Events = @Events;           
+                }
+            }
+
+            locationContext.LocationId = locationId;
+            locationContext.Name = locationToUpdate.Name ?? locationContext.Name;
+            locationContext.Address = locationToUpdate.Address ?? locationContext.Address;
+            locationContext.City = locationToUpdate.City ?? locationContext.City;
+            locationContext.LocationURL = locationToUpdate.LocationURL ?? locationContext.LocationURL;
+
+            _context.Locations.Update(locationContext);
             return await SaveAsync();
         }
         public bool DeleteLocation(Location location)
@@ -179,9 +206,22 @@ namespace GospodaWiki.Repository
                 return false;
             }
 
-            location.isPublished = true;
+            location.isPublished = !location.isPublished;
             _context.Locations.Update(location);
             return await SaveAsync();
+        }
+
+        public bool DeleteLocation(int locationId)
+        {
+            var location = _context.Locations.FirstOrDefault(l => l.LocationId == locationId);
+            if(location == null)
+            {
+                return false;
+            }
+
+            _context.Locations.Remove(location);
+            return Save();
+           
         }
     }
 }

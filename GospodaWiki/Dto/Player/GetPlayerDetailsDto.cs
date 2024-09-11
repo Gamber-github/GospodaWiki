@@ -1,4 +1,6 @@
-﻿namespace GospodaWiki.Dto.Player
+﻿using GospodaWiki.Dto.Series;
+
+namespace GospodaWiki.Dto.Player
 {
     public class GetPlayerDetailsDto
     {
@@ -8,7 +10,7 @@
         public int? Age { get; set; }
         public string? About { get; set; }
         public string? Image { get; set; }
-        public ICollection<string> Series { get; set; }
+        public ICollection<GetSeriesReferenceDto> Series { get; set; }
         public bool isPublished { get; set; }
     }
 }

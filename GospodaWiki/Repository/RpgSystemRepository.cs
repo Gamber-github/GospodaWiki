@@ -1,6 +1,8 @@
 ﻿using GospodaWiki.Data;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.RpgSystem;
+using GospodaWiki.Dto.Series;
+using GospodaWiki.Dto.Story;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
@@ -41,36 +43,32 @@ namespace GospodaWiki.Repository
         {
             var rpgSystemContext = _context.RpgSystems
                 .Where(rpg => rpg.isPublished)
+                .Include(r => r.Stories)
+                .Include(r => r.Characters)
+                .Include(r => r.Series)
+                .Include(r => r.Tags)
                 .FirstOrDefault(c => c.RpgSystemId == id);
-            var story = _context.Stories.Where(s => s.isPublished).FirstOrDefault(s => s.RpgSystemId == rpgSystemContext.RpgSystemId);
-            var tags = _context.Tags.Where(t => t.RpgSystems.Any(r => r.RpgSystemId == rpgSystemContext.RpgSystemId)).Where(t => t.isPublished).Select(t => new GetTagDetailsDto { Name = t.Name, TagId = t.TagId });
-            var characters = _context.Characters.Where(c => c.RpgSystemId == rpgSystemContext.RpgSystemId).Where(c => c.isPublished).Select(c => new CharactersDto { FullName = c.FirstName + " " + c.LastName , CharacterId = c.CharacterId, isPublished = c.isPublished}).ToList();
-            var series = _context.Series.Where(s => s.RpgSystemId == rpgSystemContext.RpgSystemId).Where(s => s.isPublished).Select(s => s.Name).ToList();
+
+            var stories = _context.Stories.Where(s => s.RpgSystemId == rpgSystemContext.RpgSystemId).Select(s => new GetStoryReferenceDTO { Name = s.Name, StoryId = s.StoryId }).ToList();
+            var tags = _context.Tags.Where(t => t.RpgSystems.Any(r => r.RpgSystemId == rpgSystemContext.RpgSystemId)).Where(t => t.isPublished).Select(t => new TagReferenceDTO { Name = t.Name, TagId = t.TagId });
+            var characters = _context.Characters.Where(c => c.RpgSystemId == rpgSystemContext.RpgSystemId).Where(c => c.isPublished).Select(c => new GetCharacterReferenceDto {   CharacterId = c.CharacterId, FirstName = c.FirstName , LastName = c.LastName}).ToList();
+            var series = _context.Series.Where(s => s.RpgSystemId == rpgSystemContext.RpgSystemId).Where(s => s.isPublished).Select(s => new GetSeriesReferenceDto { Name = s.Name , SeriesId = s.SeriesId}).ToList();
 
             var rpgSystemDetailsDto = new GetRpgSystemDetailsDto
             {
                 RpgSystemId = rpgSystemContext.RpgSystemId,
                 Name = rpgSystemContext.Name,
                 Description = rpgSystemContext.Description,
-                StoryName = story?.Name,
+                Stories = stories,
                 ImagePath = rpgSystemContext.ImagePath,
                 Characters = characters,
                 Series = series.ToList(),
                 Tags = tags.ToList(),
+
                 isPublished = rpgSystemContext.isPublished
             };
 
             return rpgSystemDetailsDto;
-        }
-
-        public RpgSystem GetRpgSystem(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException("Name cannot be empty or null.");
-            }
-
-            return _context.RpgSystems.FirstOrDefault(c => c.Name == name);
         }
 
         public bool RpgSystemExists(int rpgSystemId)
@@ -112,6 +110,7 @@ namespace GospodaWiki.Repository
                 .Include(c => c.Characters)
                 .Include(c => c.Series)
                 .Include(c => c.Tags)
+                .Include(c => c.Stories)
                 .FirstOrDefault(c => c.RpgSystemId == rpgSystemId);
 
             if (rpgSystemContext == null)
@@ -122,7 +121,6 @@ namespace GospodaWiki.Repository
             rpgSystemContext.Name = rpgSystemToUpdate.Name ?? rpgSystemContext.Name;
             rpgSystemContext.Description = rpgSystemToUpdate.Description ?? rpgSystemContext.Description;
             rpgSystemContext.ImagePath = rpgSystemToUpdate.ImagePath ?? rpgSystemContext.ImagePath;
-            rpgSystemContext.StoryName = rpgSystemToUpdate.StoryName ?? rpgSystemContext.StoryName;
 
             if (rpgSystemToUpdate.CharactersIds != null)
             {
@@ -152,6 +150,15 @@ namespace GospodaWiki.Repository
                         .ToList();
                     rpgSystemContext.Tags = tags;
                 }
+            }
+
+            if (rpgSystemToUpdate.StoryIDs != null)
+            {
+                rpgSystemContext.Stories.Clear();
+                var stories = _context.Stories
+                    .Where(s => rpgSystemToUpdate.StoryIDs.Contains(s.StoryId))
+                    .ToList();
+                rpgSystemContext.Stories = stories;
             }
 
             _context.RpgSystems.Update(rpgSystemContext);
@@ -192,21 +199,28 @@ namespace GospodaWiki.Repository
         public GetRpgSystemDetailsDto GetUnpublishedRpgSystem(int rpgSystemId)
         {
             var rpgSystemContext = _context.RpgSystems
+                .Include(r => r.Stories)
+                .Include(r => r.Characters)
+                .Include(r => r.Series)
+                .Include(r => r.Tags)
                 .FirstOrDefault(c => c.RpgSystemId == rpgSystemId);
-            var story = _context.Stories.FirstOrDefault(s => s.RpgSystemId == rpgSystemContext.RpgSystemId);
-            var tags = _context.Tags.Where(t => t.RpgSystems.Any(r => r.RpgSystemId == rpgSystemContext.RpgSystemId)).Select(t => new GetTagDetailsDto { Name = t.Name, TagId = t.TagId });
-            var characters = _context.Characters.Where(c => c.RpgSystemId == rpgSystemContext.RpgSystemId).Select(c => new CharactersDto { FullName = c.FirstName + " " + c.LastName, CharacterId = c.CharacterId, isPublished = c.isPublished }).ToList();
-            var series = _context.Series.Where(s => s.RpgSystemId == rpgSystemContext.RpgSystemId).Select(s => s.Name).ToList();
+
+
+            var stories = _context.Stories.Where(s => s.RpgSystemId == rpgSystemContext.RpgSystemId).Select(s => new GetStoryReferenceDTO { Name = s.Name , StoryId = s.StoryId}).ToList();
+            var tags = _context.Tags.Where(t => t.RpgSystems.Any(r => r.RpgSystemId == rpgSystemContext.RpgSystemId)).Select(t => new TagReferenceDTO { Name = t.Name, TagId = t.TagId });
+            var characters = _context.Characters.Where(c => c.RpgSystemId == rpgSystemContext.RpgSystemId).Select(c => new GetCharacterReferenceDto {  CharacterId = c.CharacterId, FirstName = c.FirstName , LastName = c.LastName }).ToList();
+            var series = _context.Series.Where(s => s.RpgSystemId == rpgSystemContext.RpgSystemId).Select(s => new GetSeriesReferenceDto { Name = s.Name, SeriesId = s.SeriesId }).ToList();
+
 
             var rpgSystemDetailsDto = new GetRpgSystemDetailsDto
             {
                 RpgSystemId = rpgSystemContext.RpgSystemId,
                 Name = rpgSystemContext.Name,
                 Description = rpgSystemContext.Description,
-                StoryName = story?.Name,
+                Stories = stories,
                 ImagePath = rpgSystemContext.ImagePath,
                 Characters = characters,
-                Series = series.ToList(),
+                Series = series,
                 Tags = tags.ToList(),
                 isPublished = rpgSystemContext.isPublished
             };
@@ -222,8 +236,21 @@ namespace GospodaWiki.Repository
                 return false;
             }
 
-            rpgSystem.isPublished = true;
+            rpgSystem.isPublished = !rpgSystem.isPublished;
             _context.RpgSystems.Update(rpgSystem);
+            return Save();
+        }
+
+        public bool DeleteRpgSystem(int rpgSystemId)
+        {
+            var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == rpgSystemId);
+
+            if (rpgSystem == null)
+            {
+                return false;
+            }
+
+            _context.RpgSystems.Remove(rpgSystem);
             return Save();
         }
     }

@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Items;
 using GospodaWiki.Interfaces;
-using GospodaWiki.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,16 +23,26 @@ namespace GospodaWiki.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetItemsDto>))]
         public IActionResult GetUnpublishedItems(int pageNumber = 1, int pageSize = 10)
         {
-            var items = _mapper.Map<List<GetItemsDto>>(_itemInterface.GetUnpublishedItems());
-            var pagedCharacters = items.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedCharacters = _mapper.Map<List<GetItemsDto>>(pagedCharacters);
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok(mappedCharacters);
+
+            var items = _mapper.Map<List<GetItemsDto>>(_itemInterface.GetUnpublishedItems());
+            var pagedCharacters = items.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedCharacters = _mapper.Map<List<GetItemsDto>>(pagedCharacters);
+
+            var response = new ItemsDTOPagedListDTO
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                totalItemCount = items.Count,
+                Items = mappedCharacters
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{itemId}")]
@@ -135,6 +143,27 @@ namespace GospodaWiki.Controllers
             if (!_itemInterface.PublishItem(itemId))
             {
                 ModelState.AddModelError("Item", "Item was not published");
+                return BadRequest(ModelState);
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{itemId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult DeleteItem([FromRoute] int itemId)
+        {
+            if (!_itemInterface.ItemExists(itemId))
+            {
+                ModelState.AddModelError("Item", "Item does not exist");
+                return NotFound(ModelState);
+            }
+
+            if (!_itemInterface.DeleteItem(itemId))
+            {
+                ModelState.AddModelError("Item", "Item was not deleted");
                 return BadRequest(ModelState);
             }
 

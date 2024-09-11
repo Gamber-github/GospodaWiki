@@ -6,6 +6,6 @@
         public string? Address { get; set; }
         public string? City { get; set; }
         public string? LocationURL { get; set; }
-        public ICollection<int>? EventId { get; set; }
+        public ICollection<int>? EventIds { get; set; }
     }
 }

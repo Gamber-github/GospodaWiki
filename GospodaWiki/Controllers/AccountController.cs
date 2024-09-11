@@ -114,8 +114,6 @@ namespace GospodaWiki.Controllers
                 return BadRequest(ModelState);
             }
 
-            Console.Write(User);
-
             var userName = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName).Value;
 
             if (userName == null)

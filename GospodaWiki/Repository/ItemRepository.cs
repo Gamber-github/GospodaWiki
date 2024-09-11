@@ -1,12 +1,14 @@
 ﻿using GospodaWiki.Data;
+using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Items;
+using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GospodaWiki.Repository
 {
-    public class ItemRepository: IItemInterface
+    public class ItemRepository : IItemInterface
     {
         private readonly DataContext _context;
         public ItemRepository(DataContext context)
@@ -30,32 +32,54 @@ namespace GospodaWiki.Repository
             _context.Items.Add(item);
             return Save();
         }
+
+        public bool DeleteItem(int itemId)
+        {
+            var item = _context.Items.FirstOrDefault(i => i.ItemId == itemId);
+            if (item == null)
+            {
+                return false;
+            }
+
+            _context.Items.Remove(item);
+            return Save();      
+        }
+
         public GetItemDetailsDto GetItem(int itemId)
         {
-            var items = _context.Items
+            var itemsContext = _context.Items
                         .Where(i => i.isPublished)
                         .Include(i => i.Characters)
                         .Include(i => i.Tags)
                         .FirstOrDefault(i => i.ItemId == itemId);
 
-            if (items == null)
+            if (itemsContext == null)
             {
                 return null;
             }
 
-            var tags = _context.Tags.Where(t => t.isPublished && t.Items.Any(i => i.ItemId == itemId)).Select(t => t.Name);
-            var characters = _context.Characters.Where(c => c.isPublished && c.Items.Any(i => i.ItemId == itemId)).Select(c => c.FirstName + " " + c.LastName);
+            var tags = _context.Tags.Where(t => t.isPublished && t.Items.Any(i => i.ItemId == itemId));
+            var characters = _context.Characters.Where(c => c.isPublished && c.Items.Any(c => c.Characters == itemsContext.Characters));
 
             var itemDto = new GetItemDetailsDto
             {
-                ItemId = items.ItemId,
-                Name = items.Name,
-                Description = items.Description,
-                ImagePath = items.ImagePath,
-                Characters = characters.ToList(),
-                OwnerName = items.OwnerName,
-                Tags = tags.ToList(),
-                isPublished = items.isPublished
+                ItemId = itemsContext.ItemId,
+                Name = itemsContext.Name,
+                Description = itemsContext.Description,
+                ImagePath = itemsContext.ImagePath,
+                Characters = characters.Select(c => new GetCharacterReferenceDto 
+                {
+                    CharacterId = c.CharacterId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                }).ToList(),
+                OwnerName = itemsContext.OwnerName,
+                Tags = tags.Select(t => new TagReferenceDTO
+                {
+                    TagId = t.TagId,
+                    Name = t.Name
+                }).ToList(),
+                isPublished = itemsContext.isPublished
             };
 
             return itemDto;
@@ -87,8 +111,8 @@ namespace GospodaWiki.Repository
                 throw new ArgumentException(nameof(items));
             }
 
-            var tags = _context.Tags.Where(t => t.Items.Any(i => i.ItemId == itemId)).Select(t => t.Name);
-            var characters = _context.Characters.Where(c => c.Items.Any(i => i.ItemId == itemId)).Select(c => c.FirstName + " " + c.LastName);
+            var tags = _context.Tags.Where(t => t.Items.Any(i => i.ItemId == itemId));
+            var characters = _context.Characters.Where(c => c.Items.Any(i => i.ItemId == itemId));
 
             var itemDto = new GetItemDetailsDto
             {
@@ -96,9 +120,19 @@ namespace GospodaWiki.Repository
                 Name = items.Name,
                 Description = items.Description,
                 ImagePath = items.ImagePath,
-                Characters = characters.ToList(),
+                Characters = characters.Select(c => new GetCharacterReferenceDto
+                {
+                    CharacterId = c.CharacterId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+
+                }).ToList(),
                 OwnerName = items.OwnerName,
-                Tags = tags.ToList(),
+                Tags = tags.Select(t => new TagReferenceDTO
+                {
+                    TagId = t.TagId,
+                    Name = t.Name
+                }).ToList(),
                 isPublished = items.isPublished
             };
 
@@ -130,7 +164,7 @@ namespace GospodaWiki.Repository
                 return false;
             }
 
-            item.isPublished = true;
+            item.isPublished = !item.isPublished;
             _context.Items.Update(item);
             return Save();
         }
@@ -150,6 +184,7 @@ namespace GospodaWiki.Repository
             var itemContext = _context.Items
                 .Include(i => i.Tags)
                 .Include(i => i.Characters)
+
                 .FirstOrDefault(i => i.ItemId == itemId);
 
             if (itemContext == null)

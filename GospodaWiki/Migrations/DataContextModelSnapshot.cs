@@ -398,6 +398,9 @@ namespace GospodaWiki.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("GameMasterId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -411,6 +414,8 @@ namespace GospodaWiki.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("SeriesId");
+
+                    b.HasIndex("GameMasterId");
 
                     b.HasIndex("RpgSystemId");
 
@@ -444,8 +449,7 @@ namespace GospodaWiki.Migrations
 
                     b.HasKey("StoryId");
 
-                    b.HasIndex("RpgSystemId")
-                        .IsUnique();
+                    b.HasIndex("RpgSystemId");
 
                     b.ToTable("Stories");
                 });
@@ -513,13 +517,13 @@ namespace GospodaWiki.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7006c360-1880-4d74-ab57-31816541a762",
+                            Id = "7a93416a-6465-41fa-aa15-85c9a7ce6bf8",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "1bac1269-4e11-4c84-b13e-a61114b07fb9",
+                            Id = "25b0820d-29f1-4af4-a1eb-47262c119fae",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -789,9 +793,15 @@ namespace GospodaWiki.Migrations
 
             modelBuilder.Entity("GospodaWiki.Models.Series", b =>
                 {
+                    b.HasOne("GospodaWiki.Models.Player", "GameMaster")
+                        .WithMany()
+                        .HasForeignKey("GameMasterId");
+
                     b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
                         .WithMany("Series")
                         .HasForeignKey("RpgSystemId");
+
+                    b.Navigation("GameMaster");
 
                     b.Navigation("RpgSystem");
                 });
@@ -799,8 +809,8 @@ namespace GospodaWiki.Migrations
             modelBuilder.Entity("GospodaWiki.Models.Story", b =>
                 {
                     b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
-                        .WithOne("Story")
-                        .HasForeignKey("GospodaWiki.Models.Story", "RpgSystemId")
+                        .WithMany("Stories")
+                        .HasForeignKey("RpgSystemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -961,7 +971,7 @@ namespace GospodaWiki.Migrations
 
                     b.Navigation("Series");
 
-                    b.Navigation("Story");
+                    b.Navigation("Stories");
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Series", b =>

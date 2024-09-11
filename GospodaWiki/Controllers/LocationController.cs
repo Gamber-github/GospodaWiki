@@ -34,9 +34,17 @@ namespace GospodaWiki.Controllers
 
             var locations = _locationRepository.GetUnpublishedLocations();
             var pagedLocations = locations.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedLocations = _mapper.Map<List<GetTagDetailsDto>>(pagedLocations);
+            var mappedLocations = _mapper.Map<List<GetLocationsDto>>(pagedLocations);
 
-            return Ok(mappedLocations);
+            var response = new LocationDTOPagedListDTO
+            {
+                Items = (IEnumerable<GetLocationsDto>)mappedLocations,
+                totalItemCount = locations.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{locationId}")]
@@ -127,7 +135,7 @@ namespace GospodaWiki.Controllers
             return NoContent();
         }
         
-        [HttpPatch("{locationId}")]
+        [HttpPatch("{locationId}/publish")]
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -146,6 +154,27 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok("Succesfully Published");
+        }
+
+        [HttpDelete("{locationId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> DeleteLocation([FromRoute] int locationId)
+        {
+            if (!await _locationRepository.LocationExists(locationId))
+            {
+                ModelState.AddModelError("", $"Something went wrong.");
+                return NotFound(ModelState);
+            }
+
+            if (!_locationRepository.DeleteLocation(locationId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting location");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
     }
 }

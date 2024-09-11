@@ -1,6 +1,6 @@
 ﻿namespace GospodaWiki.Dto.Event
 {
-    public class EventsDto
+    public class GetEventsDto
     {
         public int EventId { get; set; }
         public string? Name { get; set; }
