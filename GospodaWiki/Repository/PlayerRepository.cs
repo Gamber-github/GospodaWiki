@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Player;
 using GospodaWiki.Dto.Series;
 using GospodaWiki.Interfaces;
@@ -141,6 +142,8 @@ namespace GospodaWiki.Repository
         }
         public bool UpdatePlayer(PutPlayerDto player, int playerId)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if (player == null) 
             {
                 throw new ArgumentNullException(nameof(player));
@@ -164,11 +167,11 @@ namespace GospodaWiki.Repository
                 playerContext.Series.Add(serie);
             }
 
-            playerContext.FirstName = player.FirstName;
-            playerContext.LastName = player.LastName;
+            playerContext.FirstName = sanitizer.Sanitize(player.FirstName);
+            playerContext.LastName = sanitizer.Sanitize(player.LastName);
             playerContext.Image = player.Image;
             playerContext.Age = player.Age;
-            playerContext.About = player.About;
+            playerContext.About = sanitizer.Sanitize(player.About);
 
             _context.Players.Update(playerContext);
             return Save();

@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
@@ -151,6 +152,8 @@ namespace GospodaWiki.Repository
         }
         public async Task<bool> UpdateLocation(PutLocationDto locationToUpdate, int locationId)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if(locationToUpdate == null)
             {
                 throw new ArgumentNullException(nameof(locationToUpdate));
@@ -180,10 +183,10 @@ namespace GospodaWiki.Repository
             }
 
             locationContext.LocationId = locationId;
-            locationContext.Name = locationToUpdate.Name ?? locationContext.Name;
-            locationContext.Address = locationToUpdate.Address ?? locationContext.Address;
-            locationContext.City = locationToUpdate.City ?? locationContext.City;
-            locationContext.LocationURL = locationToUpdate.LocationURL ?? locationContext.LocationURL;
+            locationContext.Name = sanitizer.Sanitize(locationToUpdate.Name);
+            locationContext.Address = sanitizer.Sanitize(locationToUpdate.Address);
+            locationContext.City = sanitizer.Sanitize(locationToUpdate.City);
+            locationContext.LocationURL = sanitizer.Sanitize(locationToUpdate.LocationURL);
 
             _context.Locations.Update(locationContext);
             return await SaveAsync();

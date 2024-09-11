@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Dto.Series;
@@ -101,6 +102,8 @@ namespace GospodaWiki.Repository
 
         public bool UpdateRpgSystem(PutRpgSystemDto rpgSystemToUpdate, int rpgSystemId)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if (rpgSystemToUpdate == null)
             {
                 throw new ArgumentNullException(nameof(rpgSystemToUpdate));
@@ -118,9 +121,9 @@ namespace GospodaWiki.Repository
                 throw new ArgumentNullException(nameof(rpgSystemToUpdate));
             }
 
-            rpgSystemContext.Name = rpgSystemToUpdate.Name ?? rpgSystemContext.Name;
-            rpgSystemContext.Description = rpgSystemToUpdate.Description ?? rpgSystemContext.Description;
-            rpgSystemContext.ImagePath = rpgSystemToUpdate.ImagePath ?? rpgSystemContext.ImagePath;
+            rpgSystemContext.Name = sanitizer.Sanitize(rpgSystemToUpdate.Name);
+            rpgSystemContext.ImagePath = rpgSystemToUpdate.ImagePath;
+            rpgSystemContext.Description = sanitizer.Sanitize(rpgSystemToUpdate.Description);
 
             if (rpgSystemToUpdate.CharactersIds != null)
             {

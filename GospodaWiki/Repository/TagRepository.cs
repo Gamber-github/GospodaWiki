@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
@@ -105,6 +106,8 @@ namespace GospodaWiki.Repository
 
         public bool UpdateTag(int tagId, PutTagDto tag)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if (tag == null)
             {
                 throw new ArgumentNullException(nameof(tag));
@@ -118,7 +121,7 @@ namespace GospodaWiki.Repository
             }
 
             tagContext.TagId = tagId;
-            tagContext.Name = tag.Name;
+            tagContext.Name = sanitizer.Sanitize(tag.Name);
 
             _context.Tags.Update(tagContext);
             return Save();

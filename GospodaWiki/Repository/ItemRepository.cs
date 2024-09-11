@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Items;
 using GospodaWiki.Dto.Tag;
@@ -176,6 +177,8 @@ namespace GospodaWiki.Repository
         }
         public bool UpdateItem(PutItemDto item, int itemId)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if (item == null)
             {
                 throw new ArgumentNullException(nameof(item));
@@ -201,9 +204,10 @@ namespace GospodaWiki.Repository
             }
 
             itemContext.ItemId = itemId;
-            itemContext.Name = item.Name;
-            itemContext.Description = item.Description;
+            itemContext.Name = sanitizer.Sanitize(item.Name);
             itemContext.ImagePath = item.ImagePath;
+
+            itemContext.Description = sanitizer.Sanitize(item.Description);
 
             _context.Items.Update(itemContext);
             return Save();

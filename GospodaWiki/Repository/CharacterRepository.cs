@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Items;
 using GospodaWiki.Dto.RpgSystem;
@@ -227,6 +228,8 @@ namespace GospodaWiki.Repository
         }
         public bool UpdateCharacter(PutCharacterDto character, int characterId)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if (character == null)
             {
                 throw new ArgumentNullException(nameof(character));
@@ -259,13 +262,14 @@ namespace GospodaWiki.Repository
             }
 
             characterContext.CharacterId = characterId;
-            characterContext.FirstName = character.FirstName;
-            characterContext.LastName = character.LastName;
             characterContext.ImagePath = character.ImagePath;
             characterContext.Age = character.Age;
-            characterContext.Description = character.Description;
             characterContext.SeriesId = series.SeriesId;
             characterContext.RpgSystemId = character.RpgSystemId;
+
+            characterContext.FirstName = sanitizer.Sanitize(character.FirstName);
+            characterContext.LastName = sanitizer.Sanitize(character.LastName);
+            characterContext.Description = sanitizer.Sanitize(character.Description);
 
             _context.Characters.Update(characterContext);
             return Save();

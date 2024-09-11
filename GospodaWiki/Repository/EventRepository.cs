@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
@@ -174,6 +175,7 @@ namespace GospodaWiki.Repository
 
         public bool UpdateEvent(PutEventDto @eventToUpdate, int @eventId)
         {
+            var sanitizer = new HtmlSanitizer();
             if (@eventToUpdate == null)
             {
                 throw new ArgumentNullException(nameof(@eventToUpdate));
@@ -202,9 +204,9 @@ namespace GospodaWiki.Repository
             }
 
             @eventContext.EventId = @eventId;
-            @eventContext.Name = @eventToUpdate.Name ?? @eventContext.Name;
-            @eventContext.Description = @eventToUpdate.Description ?? @eventContext.Description;
-            @eventContext.EventUrl = @eventToUpdate.EventUrl ?? @eventContext.EventUrl;
+            @eventContext.Name = sanitizer.Sanitize(@eventToUpdate.Name);
+            @eventContext.Description = sanitizer.Sanitize(@eventToUpdate.Description);
+            @eventContext.EventUrl = sanitizer.Sanitize(@eventToUpdate.EventUrl);
             @eventContext.ImagePath = @eventToUpdate.ImagePath ?? @eventContext.ImagePath;
             @eventContext.Date = DateTime.Parse(@eventToUpdate.Date);
             @eventContext.LocationId = @eventToUpdate.LocationId ?? eventContext.LocationId;

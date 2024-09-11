@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Player;
 using GospodaWiki.Dto.RpgSystem;
@@ -263,6 +264,8 @@ namespace GospodaWiki.Repository
         }
         public bool UpdateSeries(PutSeriesDto seriesToUpdate, int seriesId)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if(seriesToUpdate == null)
             {
                 throw new ArgumentNullException(nameof(seriesToUpdate));
@@ -279,11 +282,11 @@ namespace GospodaWiki.Repository
                 throw new ArgumentNullException(nameof(seriesToUpdate));
             }
 
-            seriesContext.Name = seriesToUpdate.Name ?? seriesContext.Name;
-            seriesContext.Description = seriesToUpdate.Description;
+            seriesContext.Name = sanitizer.Sanitize(seriesToUpdate.Name);
             seriesContext.RpgSystemId = seriesToUpdate.RpgSystemId;
-            seriesContext.YoutubePlaylistId = seriesToUpdate.YoutubePlaylistId ?? seriesContext.YoutubePlaylistId;
+            seriesContext.YoutubePlaylistId = sanitizer.Sanitize(seriesToUpdate.YoutubePlaylistId);
             seriesContext.GameMasterId = seriesToUpdate.GameMasterId;
+            seriesContext.Description = sanitizer.Sanitize(seriesToUpdate.Description);
 
             if (seriesToUpdate.TagsId != null)
             {
