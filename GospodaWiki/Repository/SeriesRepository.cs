@@ -26,8 +26,10 @@ namespace GospodaWiki.Repository
                 .ToList();
             var seriesDto = new List<GetSeriesDto>();
 
+
             foreach (var s in series)
             {
+
                 var characters = _context.Characters.Where(c => c.SeriesId == s.SeriesId);
                 var tags = _context.Tags.Where(t => t.Series.Any(s => s.SeriesId == s.SeriesId));
                 var rpgSystem = _context.RpgSystems.FirstOrDefault(r => r.RpgSystemId == s.RpgSystemId);
@@ -342,7 +344,6 @@ namespace GospodaWiki.Repository
             _context.Series.Update(seriesContext);
             return Save();
         }
-
         public bool DeleteSeries(int seriesId)
         {
             var seriesContext = _context.Series.FirstOrDefault(s => s.SeriesId == seriesId);

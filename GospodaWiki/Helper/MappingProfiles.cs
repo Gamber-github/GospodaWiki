@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GospodaWiki.Dto.Adventure;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Dto.Items;
@@ -55,6 +56,11 @@ namespace GospodaWiki.Helper
             CreateMap<GetItemDetailsDto, Item>();
             CreateMap<PostItemDto, Item>();
             CreateMap<PutItemDto, Item>();
+
+            CreateMap<GetAdventuresDto, Adventure>();
+            CreateMap<GetAdventureDetailsDto, Adventure>();
+            CreateMap<PostAdventureDto, Adventure>();
+            CreateMap<PutAdventureDto, Adventure>();
         }
     }
 }

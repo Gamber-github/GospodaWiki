@@ -9,7 +9,7 @@ namespace GospodaWiki.Models
         public ICollection<Series>? Series { get; set; }
         public ICollection<Event>? Events { get; set; }
         public ICollection<Item>? Items { get; set; }
-        public ICollection<Story>? Stories { get; set; }
+        public ICollection<Adventure>? Adventures { get; set; }
         public bool isPublished { get; set; } = false;
     }
 }

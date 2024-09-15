@@ -92,6 +92,7 @@ builder.Services.AddScoped<ILocationInterface, LocationRepository>();
 builder.Services.AddScoped<ISeriesInterface, SeriesRepository>();
 builder.Services.AddScoped<ITagInterface, TagRepository>();
 builder.Services.AddScoped<IItemInterface, ItemRepository>();
+builder.Services.AddScoped<IAdventureInterface, AdventureRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddCors(options =>

@@ -4,6 +4,7 @@ using GospodaWiki.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GospodaWiki.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240915125308_1453")]
+    partial class _1453
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,6 +117,9 @@ namespace GospodaWiki.Migrations
                     b.Property<int?>("SeriesId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -125,6 +131,8 @@ namespace GospodaWiki.Migrations
                     b.HasIndex("RpgSystemId");
 
                     b.HasIndex("SeriesId");
+
+                    b.HasIndex("StoryId");
 
                     b.ToTable("Adventures");
                 });
@@ -484,6 +492,38 @@ namespace GospodaWiki.Migrations
                     b.ToTable("Series");
                 });
 
+            modelBuilder.Entity("GospodaWiki.Models.Story", b =>
+                {
+                    b.Property<int>("StoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StoryId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RpgSystemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("YoutubeVideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isPublished")
+                        .HasColumnType("bit");
+
+                    b.HasKey("StoryId");
+
+                    b.HasIndex("RpgSystemId");
+
+                    b.ToTable("Stories");
+                });
+
             modelBuilder.Entity("GospodaWiki.Models.Tag", b =>
                 {
                     b.Property<int>("TagId")
@@ -547,13 +587,13 @@ namespace GospodaWiki.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "984ea005-c679-44a6-9df7-6f7bb726ab56",
+                            Id = "f45be7d0-1d34-4cf4-88da-09197b3b7876",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "c9757a4b-2e6d-4db1-896c-fac6bc179a61",
+                            Id = "f0a19d86-9dc9-4f13-a8ca-bb2036cc5d9d",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -710,6 +750,21 @@ namespace GospodaWiki.Migrations
                     b.ToTable("SeriesTags", (string)null);
                 });
 
+            modelBuilder.Entity("StoryTag", b =>
+                {
+                    b.Property<int>("StoriesStoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagsTagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StoriesStoryId", "TagsTagId");
+
+                    b.HasIndex("TagsTagId");
+
+                    b.ToTable("StoryTags", (string)null);
+                });
+
             modelBuilder.Entity("AdventureCharacter", b =>
                 {
                     b.HasOne("GospodaWiki.Models.Adventure", null)
@@ -795,9 +850,15 @@ namespace GospodaWiki.Migrations
                         .WithMany("Adventures")
                         .HasForeignKey("SeriesId");
 
+                    b.HasOne("GospodaWiki.Models.Story", "Story")
+                        .WithMany("Adventures")
+                        .HasForeignKey("StoryId");
+
                     b.Navigation("RpgSystem");
 
                     b.Navigation("Series");
+
+                    b.Navigation("Story");
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Character", b =>
@@ -862,6 +923,17 @@ namespace GospodaWiki.Migrations
                         .HasForeignKey("RpgSystemId");
 
                     b.Navigation("GameMaster");
+
+                    b.Navigation("RpgSystem");
+                });
+
+            modelBuilder.Entity("GospodaWiki.Models.Story", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
+                        .WithMany("Stories")
+                        .HasForeignKey("RpgSystemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("RpgSystem");
                 });
@@ -977,6 +1049,21 @@ namespace GospodaWiki.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StoryTag", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.Story", null)
+                        .WithMany()
+                        .HasForeignKey("StoriesStoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GospodaWiki.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("GospodaWiki.Models.Character", b =>
                 {
                     b.Navigation("Image");
@@ -1006,6 +1093,8 @@ namespace GospodaWiki.Migrations
                     b.Navigation("Image");
 
                     b.Navigation("Series");
+
+                    b.Navigation("Stories");
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Series", b =>
@@ -1013,6 +1102,11 @@ namespace GospodaWiki.Migrations
                     b.Navigation("Adventures");
 
                     b.Navigation("Characters");
+                });
+
+            modelBuilder.Entity("GospodaWiki.Models.Story", b =>
+                {
+                    b.Navigation("Adventures");
                 });
 #pragma warning restore 612, 618
         }

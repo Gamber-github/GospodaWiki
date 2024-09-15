@@ -13,7 +13,6 @@ namespace GospodaWiki.Interfaces
         bool Save();
         Task<bool> SaveAsync();
         bool PublishCharacter(int characterId);
-
         bool DeleteCharacter(int characterId);
     }
 }
