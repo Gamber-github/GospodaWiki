@@ -1,4 +1,6 @@
-﻿namespace GospodaWiki.Dto.Location
+﻿using GospodaWiki.Dto.Event;
+
+namespace GospodaWiki.Dto.Location
 {
     public class LocationDetailsDto
     {
@@ -8,6 +10,6 @@
         public string? City { get; set; }
         public string? LocationURL { get; set; }
         public bool isPublished { get; set; }
-        public ICollection<string>? Events { get; set; }
+        public ICollection<GetEventReferenceDto>? Events { get; set; }
     }
 }

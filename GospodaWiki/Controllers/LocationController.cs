@@ -3,6 +3,7 @@ using GospodaWiki.Dto.Location;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -21,6 +22,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(LocationDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedLocations(int pageNumber = 1, int pageSize = 10)
@@ -32,12 +34,21 @@ namespace GospodaWiki.Controllers
 
             var locations = _locationRepository.GetUnpublishedLocations();
             var pagedLocations = locations.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedLocations = _mapper.Map<List<GetTagDetailsDto>>(pagedLocations);
+            var mappedLocations = _mapper.Map<List<GetLocationsDto>>(pagedLocations);
 
-            return Ok(mappedLocations);
+            var response = new LocationDTOPagedListDTO
+            {
+                Items = (IEnumerable<GetLocationsDto>)mappedLocations,
+                totalItemCount = locations.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{locationId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(LocationDetailsDto))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetUnpublishedLocation(int locationId)
@@ -58,6 +69,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         public IActionResult CreateLocation([FromBody] PostLocationDto locationCreate)
@@ -92,6 +104,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{locationId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task <IActionResult> UpdateLocation([FromRoute] int locationId, [FromBody] PutLocationDto locationUpdate)
@@ -122,7 +135,8 @@ namespace GospodaWiki.Controllers
             return NoContent();
         }
         
-        [HttpPatch("{locationId}")]
+        [HttpPatch("{locationId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public async Task<IActionResult> PublishLocation([FromRoute] int locationId)
@@ -140,6 +154,27 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok("Succesfully Published");
+        }
+
+        [HttpDelete("{locationId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> DeleteLocation([FromRoute] int locationId)
+        {
+            if (!await _locationRepository.LocationExists(locationId))
+            {
+                ModelState.AddModelError("", $"Something went wrong.");
+                return NotFound(ModelState);
+            }
+
+            if (!_locationRepository.DeleteLocation(locationId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting location");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
     }
 }

@@ -14,5 +14,6 @@ namespace GospodaWiki.Interfaces
         public bool UpdateRpgSystem(PutRpgSystemDto rpgSystem, int rpgSystemId);
         public bool PublishRpgSystem (int rpgSystemId);
         public bool Save();
+        public bool DeleteRpgSystem(int rpgSystemId);
     }
 }

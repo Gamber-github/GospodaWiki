@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Models;
+﻿using GospodaWiki.Dto.Location;
+using GospodaWiki.Dto.Tag;
 
 namespace GospodaWiki.Dto.Event
 {
@@ -11,7 +12,7 @@ namespace GospodaWiki.Dto.Event
         public string? ImagePath { get; set; }
         public DateTime? Date { get; set; }
         public bool isPublished { get; set; }
-        public GospodaWiki.Models.Location? Location { get; set; }
-        public ICollection<string>? Tags { get; set; }
+        public GetLocationReferenceDTO? Location { get; set; }
+        public ICollection<TagReferenceDTO>? Tags { get; set; }
     }
 }

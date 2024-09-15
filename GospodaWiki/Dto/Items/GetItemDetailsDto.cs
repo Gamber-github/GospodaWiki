@@ -1,4 +1,7 @@
-﻿namespace GospodaWiki.Dto.Items
+﻿using GospodaWiki.Dto.Character;
+using GospodaWiki.Dto.Tag;
+
+namespace GospodaWiki.Dto.Items
 {
     public class GetItemDetailsDto
     {
@@ -6,9 +9,9 @@
         public string? Name { get; set; }
         public string? Description { get; set; }
         public string? ImagePath { get; set; }
-        public ICollection<string>? Characters { get; set; }
+        public ICollection<GetCharacterReferenceDto>? Characters { get; set; }
         public string? OwnerName { get; set; }
-        public ICollection<string>? Tags { get; set; }
+        public ICollection<TagReferenceDTO>? Tags { get; set; }
         public bool isPublished { get; set; } = false;
     }
 }

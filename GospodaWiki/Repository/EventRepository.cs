@@ -1,5 +1,7 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Event;
+using GospodaWiki.Dto.Location;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +16,14 @@ namespace GospodaWiki.Repository
             _context = context;
         }
 
-        public ICollection<EventsDto> GetEvents()
+        public ICollection<GetEventsDto> GetEvents()
         {
             var events = _context.Events.Where(e => e.isPublished == true).ToList();
-            var eventsDto = new List<EventsDto>();
+            var eventsDto = new List<GetEventsDto>();
 
             foreach (var @event in events)
             {
-                eventsDto.Add(new EventsDto
+                eventsDto.Add(new GetEventsDto
                 {
                     EventId = @event.EventId,
                     Name = @event.Name,
@@ -36,14 +38,14 @@ namespace GospodaWiki.Repository
             return eventsDto;
         }
 
-        public ICollection<EventsDto> GetUnpublishedEvents()
+        public ICollection<GetEventsDto> GetUnpublishedEvents()
         {
             var events = _context.Events.ToList();
-            var eventsDto = new List<EventsDto>();
+            var eventsDto = new List<GetEventsDto>();
 
             foreach (var @event in events)
             {
-                eventsDto.Add(new EventsDto
+                eventsDto.Add(new GetEventsDto
                 {
                     EventId = @event.EventId,
                     Name = @event.Name,
@@ -61,7 +63,10 @@ namespace GospodaWiki.Repository
 
         public EventDetailsDto GetEvent(int eventId)
         {
-            var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == eventId && p.isPublished);
+            var @eventContext = _context.Events
+                .Include(e => e.Tags)
+                .Include(e => e.Location)
+                .FirstOrDefault(p => p.EventId == eventId && p.isPublished);
 
             if (@eventContext == null)
             {
@@ -69,7 +74,8 @@ namespace GospodaWiki.Repository
             }
 
             var location = _context.Locations.FirstOrDefault(l => l.LocationId == @eventContext.LocationId);
-            var tags = _context.Tags.Where(t => t.Events.Any(e => e.EventId == @eventContext.EventId)).Select(t => t.Name).ToList();
+            var tags = _context.Tags.Where(e => e.isPublished && e.Events.Any(e => e.EventId == eventContext.EventId));
+
 
             var @eventDto = new EventDetailsDto
             {
@@ -79,15 +85,17 @@ namespace GospodaWiki.Repository
                 EventUrl = @eventContext.EventUrl,
                 ImagePath = @eventContext.ImagePath,
                 Date = @eventContext.Date,
-                Location = location != null ? new Location
+                Location = location != null ? new GetLocationReferenceDTO
                 {
                     LocationId = location.LocationId,
                     Name = location.Name,
-                    Address = location.Address,
-                    City = location.City,
-                    LocationURL = location.LocationURL
-                } : new Location(),
-                Tags = tags.ToArray(),
+       
+                } : new GetLocationReferenceDTO(),
+                Tags = tags.Select( t=> new Dto.Tag.TagReferenceDTO
+                {
+                    TagId = t.TagId,
+                    Name = t.Name
+                }).ToList(),
                 isPublished = @eventContext.isPublished
             };
 
@@ -96,7 +104,10 @@ namespace GospodaWiki.Repository
 
         public EventDetailsDto GetUnpublishedEvent(int eventId)
         {
-            var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == eventId);
+            var @eventContext = _context.Events
+                .Include(e => e.Tags)
+                .Include(e => e.Location)
+                .FirstOrDefault(p => p.EventId == eventId);
 
             if (@eventContext == null)
             {
@@ -104,7 +115,7 @@ namespace GospodaWiki.Repository
             }
 
             var location = _context.Locations.FirstOrDefault(l => l.LocationId == @eventContext.LocationId);
-            var tags = _context.Tags.Where(t => t.Events.Any(e => e.EventId == @eventContext.EventId)).Select(t => t.Name).ToList();
+            var tags = _context.Tags.Where(e => e.Events.Any(e => e.EventId == eventContext.EventId));
 
             var @eventDto = new EventDetailsDto
             {
@@ -114,15 +125,17 @@ namespace GospodaWiki.Repository
                 EventUrl = @eventContext.EventUrl,
                 ImagePath = @eventContext.ImagePath,
                 Date = @eventContext.Date,
-                Location = location != null ? new Location
+                Location = location != null ? new GetLocationReferenceDTO
                 {
                     LocationId = location.LocationId,
                     Name = location.Name,
-                    Address = location.Address,
-                    City = location.City,
-                    LocationURL = location.LocationURL
-                } : new Location(),
-                Tags = tags.ToArray(),
+
+                } : new GetLocationReferenceDTO(),
+                Tags = tags.Select(t => new Dto.Tag.TagReferenceDTO
+                {
+                    TagId = t.TagId,
+                    Name = t.Name
+                }).ToList(),
                 isPublished = @eventContext.isPublished
 
             };
@@ -148,8 +161,6 @@ namespace GospodaWiki.Repository
                 EventUrl = @eventCreate.EventUrl,
                 ImagePath = @eventCreate.ImagePath,
                 Date = @eventCreate.Date,
-                LocationId = @eventCreate.LocationId,
-                Tags = _context.Tags.Where(t => @eventCreate.TagIds.Contains(t.TagId)).ToList()
             };
 
             _context.Events.Add(@event);
@@ -161,21 +172,18 @@ namespace GospodaWiki.Repository
             var saved = _context.SaveChanges();
             return saved >= 0;
         }
-        public async Task<bool> SaveAsync()
-        {
-            var saved = await _context.SaveChangesAsync();
-            return saved >= 0;
-        }
 
-        public bool UpdateEvent(PutEventDto @event, int @eventId)
+        public bool UpdateEvent(PutEventDto @eventToUpdate, int @eventId)
         {
-            if (@event == null)
+            var sanitizer = new HtmlSanitizer();
+            if (@eventToUpdate == null)
             {
-                throw new ArgumentNullException(nameof(@event));
+                throw new ArgumentNullException(nameof(@eventToUpdate));
             }
 
             var @eventContext = _context.Events
                 .Include(e => e.Tags)
+                .Include(e => e.Location)
                 .FirstOrDefault(p => p.EventId == @eventId);
 
             if (@eventContext == null)
@@ -183,21 +191,25 @@ namespace GospodaWiki.Repository
                 throw new ArgumentNullException(nameof(@eventContext));
             }
 
-            @eventContext.Tags.Clear();
-
-            var tags =  _context.Tags.Where(t => @event.TagIds.Contains(t.TagId)).ToList();
-            foreach (var tag in tags)
+            if (@eventToUpdate.TagIds != null)
             {
-                @eventContext.Tags.Add(tag);
+                @eventContext.Tags?.Clear();
+                if (@eventToUpdate.TagIds.Any())
+                {
+                    var tags = _context.Tags
+                        .Where(t => @eventToUpdate.TagIds.Contains(t.TagId))
+                        .ToList();
+                    @eventContext.Tags = tags;
+                }
             }
 
             @eventContext.EventId = @eventId;
-            @eventContext.Name = @event.Name;
-            @eventContext.Description = @event.Description;
-            @eventContext.EventUrl = @event.EventUrl;
-            @eventContext.ImagePath = @event.ImagePath;
-            @eventContext.Date = @event.Date;
-            @eventContext.LocationId = @event.LocationId;   
+            @eventContext.Name = sanitizer.Sanitize(@eventToUpdate.Name);
+            @eventContext.Description = sanitizer.Sanitize(@eventToUpdate.Description);
+            @eventContext.EventUrl = sanitizer.Sanitize(@eventToUpdate.EventUrl);
+            @eventContext.ImagePath = @eventToUpdate.ImagePath ?? @eventContext.ImagePath;
+            @eventContext.Date = DateTime.Parse(@eventToUpdate.Date);
+            @eventContext.LocationId = @eventToUpdate.LocationId ?? eventContext.LocationId;
 
             _context.Events.Update(@eventContext);
             return Save();
@@ -214,7 +226,7 @@ namespace GospodaWiki.Repository
             return Save();
         }
 
-        public async Task<bool> PublishEvent(int eventId)
+        public bool PublishEvent(int eventId)
         {
             var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == eventId);
 
@@ -223,9 +235,22 @@ namespace GospodaWiki.Repository
                 throw new ArgumentNullException(nameof(@eventContext));
             }
 
-            @eventContext.isPublished = true;
+            @eventContext.isPublished = !eventContext.isPublished;
             _context.Events.Update(@eventContext);
-            return await SaveAsync();
+            return Save();
+        }
+
+        public bool DeleteEvent(int eventId)
+        {
+            var @eventContext = _context.Events.FirstOrDefault(p => p.EventId == eventId);
+
+            if (@eventContext == null)
+            {
+                throw new ArgumentNullException(nameof(@eventContext));
+            }
+
+            _context.Events.Remove(@eventContext);
+            return Save();
         }
     }
 }

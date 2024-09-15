@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GospodaWiki.Dto.Adventure;
 using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Dto.Items;
@@ -18,8 +19,8 @@ namespace GospodaWiki.Helper
             CreateMap<Character, CharacterDetailsDto>();
             CreateMap<CharacterDetailsDto, Character>();
 
-            CreateMap<CharactersDto, Character>();
-            CreateMap<Character, CharactersDto>();
+            CreateMap<GetCharactersDto, Character>();
+            CreateMap<Character, GetCharactersDto>();
             CreateMap<PostCharacterDto, Character>();
 
             CreateMap<PostCharacterDto, Character>();
@@ -32,7 +33,7 @@ namespace GospodaWiki.Helper
             CreateMap<PutRpgSystemDto, RpgSystem>();
 
             CreateMap<EventDetailsDto, Event>();
-            CreateMap<EventsDto, Event>();
+            CreateMap<GetEventsDto, Event>();
             CreateMap<PostEventDto, Event>();
             CreateMap<PutEventDto, Event>();
 
@@ -55,6 +56,11 @@ namespace GospodaWiki.Helper
             CreateMap<GetItemDetailsDto, Item>();
             CreateMap<PostItemDto, Item>();
             CreateMap<PutItemDto, Item>();
+
+            CreateMap<GetAdventuresDto, Adventure>();
+            CreateMap<GetAdventureDetailsDto, Adventure>();
+            CreateMap<PostAdventureDto, Adventure>();
+            CreateMap<PutAdventureDto, Adventure>();
         }
     }
 }

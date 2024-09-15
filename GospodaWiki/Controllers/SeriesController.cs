@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Series;
-using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
-using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -21,21 +20,34 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetSeriesDto>))]
         public IActionResult GetUnpublishedSeries(int pageNumber = 1, int pageSize = 10)
         {
-            var series = _mapper.Map<List<GetSeriesDto>>(_seriesRepository.GetUnpublishedSeries());
-            var pagedSeries = series.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedSeries = _mapper.Map<List<GetTagDetailsDto>>(pagedSeries);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(mappedSeries);
+
+            var series = _mapper.Map<List<GetSeriesDto>>(_seriesRepository.GetUnpublishedSeries());
+            var pagedSeries = series.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedSeries = _mapper.Map<List<GetSeriesDto>>(pagedSeries);
+
+            var response = new SerieDTOPagedListDTO
+            {
+                Items = (IEnumerable<GetSeriesDto>)mappedSeries,
+                totalItemCount = series.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+
+
+            return Ok(response);
         }
 
         [HttpGet("{seriesId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(GetSeriesDetailsDto))]
         public IActionResult GetUnpublishedSeriesById(int seriesId)
         {
@@ -53,6 +65,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateSeries([FromBody] PostSeriesDto seriesCreate)
@@ -87,6 +100,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{seriesId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult UpdateSeries([FromBody] PutSeriesDto seriesUpdate, [FromRoute] int seriesId)
@@ -113,15 +127,15 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully Updated");
         }
 
-        [HttpPatch("{seriesId}")]
+        [HttpPatch("{seriesId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishSeries([FromRoute] int seriesId)
         {
             if (!_seriesRepository.SeriesExists(seriesId))
             {
-                ModelState.AddModelError("", $"Series with id {seriesId} does not exist");
-                return StatusCode(404, ModelState);
+                return NotFound();
             }
 
             if (!_seriesRepository.PublishSeries(seriesId))
@@ -131,6 +145,28 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok("Succesfully Published");
+        }
+
+        [HttpDelete("{seriesId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+
+        public IActionResult DeleteSeries([FromRoute] int seriesId)
+        {
+            if (!_seriesRepository.SeriesExists(seriesId))
+            {
+                ModelState.AddModelError("", $"Series with id {seriesId} does not exist");
+                return StatusCode(404, ModelState);
+            }
+
+            if (!_seriesRepository.DeleteSeries(seriesId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting series with id {seriesId}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully Deleted");
         }
     }
 }

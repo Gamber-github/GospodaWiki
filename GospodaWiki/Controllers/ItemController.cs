@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
-using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Items;
 using GospodaWiki.Interfaces;
-using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -20,22 +19,34 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetItemsDto>))]
         public IActionResult GetUnpublishedItems(int pageNumber = 1, int pageSize = 10)
         {
-            var items = _mapper.Map<List<GetItemsDto>>(_itemInterface.GetUnpublishedItems());
-            var pagedCharacters = items.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedCharacters = _mapper.Map<List<GetItemsDto>>(pagedCharacters);
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok(mappedCharacters);
+
+            var items = _mapper.Map<List<GetItemsDto>>(_itemInterface.GetUnpublishedItems());
+            var pagedCharacters = items.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedCharacters = _mapper.Map<List<GetItemsDto>>(pagedCharacters);
+
+            var response = new ItemsDTOPagedListDTO
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                totalItemCount = items.Count,
+                Items = mappedCharacters
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{itemId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(GetItemDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedItem(int itemId)
@@ -61,6 +72,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204, Type = typeof(PostItemDto))]
         [ProducesResponseType(400)]
         public IActionResult CreateItem([FromBody] PostItemDto itemCreate)
@@ -87,6 +99,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{itemId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult UpdateItem([FromRoute] int itemId, [FromBody] PutItemDto itemUpdate)
@@ -116,6 +129,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{itemId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishItem([FromRoute] int itemId)
@@ -129,6 +143,27 @@ namespace GospodaWiki.Controllers
             if (!_itemInterface.PublishItem(itemId))
             {
                 ModelState.AddModelError("Item", "Item was not published");
+                return BadRequest(ModelState);
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{itemId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult DeleteItem([FromRoute] int itemId)
+        {
+            if (!_itemInterface.ItemExists(itemId))
+            {
+                ModelState.AddModelError("Item", "Item does not exist");
+                return NotFound(ModelState);
+            }
+
+            if (!_itemInterface.DeleteItem(itemId))
+            {
+                ModelState.AddModelError("Item", "Item was not deleted");
                 return BadRequest(ModelState);
             }
 

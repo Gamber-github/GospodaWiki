@@ -3,6 +3,7 @@ using GospodaWiki.Dto.Character;
 using GospodaWiki.Dto.Event;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -20,21 +21,32 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<EventsDto>))]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetEventsDto>))]
         public IActionResult GetUnpublishedEvents(int pageNumber = 1, int pageSize = 10)
         {
-            var events = _mapper.Map<List<EventsDto>>(_eventRepository.GetUnpublishedEvents());
+            var events = _mapper.Map<List<GetEventsDto>>(_eventRepository.GetUnpublishedEvents());
             var pagedEvents = events.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedEvents = _mapper.Map<List<EventsDto>>(pagedEvents);
+            var mappedEvents = _mapper.Map<List<GetEventsDto>>(pagedEvents);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(mappedEvents);
+
+            var response = new EventDTOPagedListDTO
+            {
+                Items = (IEnumerable<GetEventsDto>)mappedEvents,
+                totalItemCount = events.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+            
+            return Ok(response);
         }
 
         [HttpGet("{eventId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(EventDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedEvent(int eventId)
@@ -55,6 +67,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateEvent([FromBody] PostEventDto eventCreate)
@@ -76,6 +89,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{eventId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
@@ -113,9 +127,10 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{eventId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> PublishEvent([FromRoute] int eventId)
+        public IActionResult PublishEvent([FromRoute] int eventId)
         {
             if (!_eventRepository.EventExists(eventId))
             {
@@ -123,13 +138,34 @@ namespace GospodaWiki.Controllers
                 return NotFound(ModelState);
             }
 
-            if (!await _eventRepository.PublishEvent(eventId))
+            if (! _eventRepository.PublishEvent(eventId))
             {
                 ModelState.AddModelError("", $"Something went wrong publishing the event with id {eventId}");
                 return StatusCode(500, ModelState);
             }
 
             return Ok("Successfully published");
+        }
+
+        [HttpDelete("{eventId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult DeleteEvent([FromRoute] int eventId)
+        {
+            if (!_eventRepository.EventExists(eventId))
+            {
+                ModelState.AddModelError("", $"Something went wrong.");
+                return NotFound(ModelState);
+            }
+
+            if (!_eventRepository.DeleteEvent(eventId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the event with id {eventId}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully deleted");
         }
     }
 }

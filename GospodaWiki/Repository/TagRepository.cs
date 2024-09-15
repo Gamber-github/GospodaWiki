@@ -1,4 +1,5 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
@@ -30,6 +31,21 @@ namespace GospodaWiki.Repository
             return Save();
             
         }
+
+        public bool DeleteTag(int tagId)
+        {
+            var tag = _context.Tags
+                .FirstOrDefault(t => t.TagId == tagId);
+
+            if (tag == null)
+            {
+                return false;
+            }
+
+            _context.Tags.Remove(tag);
+            return Save();
+        }
+
         public ICollection<GetTagDetailsDto> GetTags()
         {
             var tags = _context.Tags
@@ -71,7 +87,7 @@ namespace GospodaWiki.Repository
                 return false;
             }
 
-            tag.isPublished = true;
+            tag.isPublished = !tag.isPublished;
             _context.Tags.Update(tag);
             return Save();
         }
@@ -90,6 +106,8 @@ namespace GospodaWiki.Repository
 
         public bool UpdateTag(int tagId, PutTagDto tag)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if (tag == null)
             {
                 throw new ArgumentNullException(nameof(tag));
@@ -103,7 +121,7 @@ namespace GospodaWiki.Repository
             }
 
             tagContext.TagId = tagId;
-            tagContext.Name = tag.Name;
+            tagContext.Name = sanitizer.Sanitize(tag.Name);
 
             _context.Tags.Update(tagContext);
             return Save();

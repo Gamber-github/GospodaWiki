@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -18,22 +19,33 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetTagDetailsDto>))]
         public IActionResult GetUnpublishedTags(int pageNumber = 1, int pageSize = 10)
         {
-            var tags = _tagRepository.GetUnpublishedTags();
-            var pagedTags = tags.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedTags = _mapper.Map<List<GetTagDetailsDto>>(pagedTags);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok(mappedTags);
+            var tags = _tagRepository.GetUnpublishedTags();
+            var pagedTags = tags.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedTags = _mapper.Map<List<GetTagDetailsDto>>(pagedTags);
+
+            var response = new TagDTOPagedListDTO
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                totalItemCount = tags.Count,
+                Items = mappedTags
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         public IActionResult CreateTag([FromBody] PutTagDto tag)
@@ -58,6 +70,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{tagId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult UpdateTag(int tagId, [FromBody] PutTagDto tag)
@@ -81,14 +94,42 @@ namespace GospodaWiki.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{tagId}")]
+        [HttpPatch("{tagId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishTag(int tagId)
         {
+
+            if (!_tagRepository.TagExists(tagId))
+            {
+                return NotFound();
+            }
+
             if (!_tagRepository.PublishTag(tagId))
             {
                 ModelState.AddModelError("", $"Something went wrong publishing the tag with id {tagId}");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{tagId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult DeleteTag(int tagId)
+        {
+
+            if (!_tagRepository.TagExists(tagId))
+            {
+                return NotFound();
+            }
+
+            if (!_tagRepository.DeleteTag(tagId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the tag with id {tagId}");
                 return StatusCode(500, ModelState);
             }
 

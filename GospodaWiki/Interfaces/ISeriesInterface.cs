@@ -13,5 +13,7 @@ namespace GospodaWiki.Interfaces
         bool Save();
         bool UpdateSeries(PutSeriesDto series, int seriesId);
         bool PublishSeries(int seriesId);
+
+        bool DeleteSeries(int seriesId);
     }
 }

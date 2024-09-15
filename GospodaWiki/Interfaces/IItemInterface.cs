@@ -13,5 +13,6 @@ namespace GospodaWiki.Interfaces
         bool UpdateItem(PutItemDto item, int itemId);
         bool Save();
         bool PublishItem(int itemId);
+        bool DeleteItem(int itemId);
     }
 }

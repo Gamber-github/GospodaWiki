@@ -16,6 +16,7 @@
         public RpgSystem? RpgSystem { get; set; }
         public ICollection<Tag>? Tags { get; set; }
         public ICollection<Item>? Items { get; set; }
+        public ICollection<Adventure>? Adventures { get; set; }
         public bool isPublished { get; set; } = false;
     }
 }

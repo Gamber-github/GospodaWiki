@@ -4,7 +4,7 @@ namespace GospodaWiki.Interfaces
 {
     public interface IUserInterface
     {
-        User GetUser(string Email);
+        AppUser GetUser(string Email);
         bool UserExists(string Email);
     }
 }

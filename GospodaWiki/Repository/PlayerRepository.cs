@@ -1,5 +1,7 @@
-﻿using GospodaWiki.Data;
+﻿using Ganss.Xss;
+using GospodaWiki.Data;
 using GospodaWiki.Dto.Player;
+using GospodaWiki.Dto.Series;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
 using Microsoft.EntityFrameworkCore;
@@ -54,23 +56,28 @@ namespace GospodaWiki.Repository
                 .FirstOrDefault(p => p.PlayerId == id);
 
             if (player == null)
-                {
-                    return null;
-                }
+            {
+                return null;
+            }
 
-            var series = _context.Series.Where(s => s.Players.Any(p => p.PlayerId == player.PlayerId)).Select(s => s.Name);
+            var series = _context.Series.Where(s => s.Players.Any(p => p.PlayerId == player.PlayerId));
+
+            var seriesList = series.Select(s => new GetSeriesReferenceDto
+            {
+                Name = s.Name,
+                SeriesId = s.SeriesId
+            }).ToList();
 
             var PlayerDto = new GetPlayerDetailsDto
-                {
-                    PlayerId = player.PlayerId,
-                    FirstName = player.FirstName,
-                    LastName = player.LastName,
-                    Series = series.ToList(),
-                    isPublished = player.isPublished
-                };
+            {
+                PlayerId = player.PlayerId,
+                FirstName = player.FirstName,
+                LastName = player.LastName,
+                Series = seriesList,
+                isPublished = player.isPublished
+            };
 
             return PlayerDto;
-
         }
         public bool PlayerExists(int playerId)
         {
@@ -111,7 +118,13 @@ namespace GospodaWiki.Repository
                 return null;
             }
 
-            var series = _context.Series.Where(s => s.Players.Any(p => p.PlayerId == player.PlayerId)).Select(s => s.Name);
+            var series = _context.Series.Where(s => s.Players.Any(p => p.PlayerId == player.PlayerId));
+
+            var seriesList = series.Select(s => new GetSeriesReferenceDto
+            {
+                Name = s.Name,
+                SeriesId = s.SeriesId
+            }).ToList();
 
             var PlayerDto = new GetPlayerDetailsDto
             {
@@ -121,7 +134,7 @@ namespace GospodaWiki.Repository
                 About = player.About,
                 Image = player.Image,
                 Age = player.Age,
-                Series = series.ToList(),
+                Series = seriesList,
                 isPublished = player.isPublished
             };
 
@@ -129,6 +142,8 @@ namespace GospodaWiki.Repository
         }
         public bool UpdatePlayer(PutPlayerDto player, int playerId)
         {
+            var sanitizer = new HtmlSanitizer();
+
             if (player == null) 
             {
                 throw new ArgumentNullException(nameof(player));
@@ -152,11 +167,11 @@ namespace GospodaWiki.Repository
                 playerContext.Series.Add(serie);
             }
 
-            playerContext.FirstName = player.FirstName;
-            playerContext.LastName = player.LastName;
+            playerContext.FirstName = sanitizer.Sanitize(player.FirstName);
+            playerContext.LastName = sanitizer.Sanitize(player.LastName);
             playerContext.Image = player.Image;
             playerContext.Age = player.Age;
-            playerContext.About = player.About;
+            playerContext.About = sanitizer.Sanitize(player.About);
 
             _context.Players.Update(playerContext);
             return Save();
@@ -170,8 +185,21 @@ namespace GospodaWiki.Repository
                 return false;
             }
 
-            player.isPublished = true;
+            player.isPublished = !player.isPublished;
             _context.Players.Update(player);
+            return Save();
+        }
+
+        public bool DeletePlayer(int playerId)
+        {
+            var player = _context.Players.FirstOrDefault(p => p.PlayerId == playerId);
+
+            if (player == null)
+            {
+                return false;
+            }
+
+            _context.Players.Remove(player);
             return Save();
         }
     }

@@ -45,12 +45,12 @@ namespace GospodaWiki.Controllers
 
         [HttpGet]
         [Route("/Characters")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<CharactersDto>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetCharactersDto>))]
         public IActionResult GetChatacters(int pageNumber = 1, int pageSize = 10)
         {
-            var characters = _mapper.Map<List<CharactersDto>>(_characterRepository.GetCharacters());
+            var characters = _mapper.Map<List<GetCharactersDto>>(_characterRepository.GetCharacters());
             var pagedCharacters = characters.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedCharacters = _mapper.Map<List<CharactersDto>>(pagedCharacters);
+            var mappedCharacters = _mapper.Map<List<GetCharactersDto>>(pagedCharacters);
 
             if (!ModelState.IsValid)
             {
@@ -85,13 +85,13 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet("/Events")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<EventsDto>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetEventsDto>))]
         [ProducesResponseType(400)]
         public IActionResult GetEvents(int pageNumber = 1, int pageSize = 10)
         {      
-            var events = _mapper.Map<List<EventsDto>>(_eventRepository.GetEvents());
+            var events = _mapper.Map<List<GetEventsDto>>(_eventRepository.GetEvents());
             var pagedEvents = events.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedEvents = _mapper.Map<List<EventsDto>>(pagedEvents);
+            var mappedEvents = _mapper.Map<List<GetEventsDto>>(pagedEvents);
 
             if (!ModelState.IsValid)
             {

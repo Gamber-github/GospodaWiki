@@ -1,5 +1,6 @@
 ﻿
 using GospodaWiki.Dto.Character;
+using GospodaWiki.Dto.Series;
 using GospodaWiki.Dto.Tag;
 
 namespace GospodaWiki.Dto.RpgSystem
@@ -10,10 +11,9 @@ namespace GospodaWiki.Dto.RpgSystem
         public string Name { get; set; }
         public string Description { get; set; }
         public string? ImagePath { get; set; }
-        public string? StoryName { get; set; }
         public bool isPublished { get; set; }
-        public ICollection<GetTagDetailsDto>? Tags { get; set; }
-        public ICollection<CharactersDto>? Characters { get; set; }
-        public ICollection<string>? Series { get; set; }
+        public ICollection<TagReferenceDTO>? Tags { get; set; }
+        public ICollection<GetCharacterReferenceDto>? Characters { get; set; }
+        public ICollection<GetSeriesReferenceDto>? Series { get; set; }
     }
 }

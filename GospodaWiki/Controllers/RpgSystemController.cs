@@ -3,6 +3,7 @@ using GospodaWiki.Dto.RpgSystem;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
 using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -20,21 +21,33 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetRpgSystemsDto>))]
         public IActionResult GetUnpublishedRpgSystems(int pageNumber = 1, int pageSize = 10)
         {
-            var rpgSystems = _mapper.Map<List<GetRpgSystemsDto>>(_rpgSystemRepository.GetUnpublishedRpgSystems());
-            var pagedRpgSystems = rpgSystems.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedRpgSystems = _mapper.Map<List<GetTagDetailsDto>>(pagedRpgSystems);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(mappedRpgSystems);
+
+            var rpgSystems = _mapper.Map<List<GetRpgSystemsDto>>(_rpgSystemRepository.GetUnpublishedRpgSystems());
+            var pagedRpgSystems = rpgSystems.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedRpgSystems = _mapper.Map<List<GetRpgSystemsDto>>(pagedRpgSystems);
+
+            var response = new RpgSystemsPagedListDto
+            {
+                Items = (IEnumerable<GetRpgSystemsDto>)mappedRpgSystems,
+                totalItemCount = rpgSystems.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{rpgSystemId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(GetRpgSystemDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedRpgSystem(int rpgSystemId)
@@ -55,6 +68,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateRpgSystem([FromBody] PostRpgSystemDto rpgSystemCreate)
@@ -90,6 +104,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{rpgSystemId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
@@ -121,7 +136,8 @@ namespace GospodaWiki.Controllers
             return Ok("Succesfully updated.");
         }
 
-        [HttpPatch("{rpgSystemId}")]
+        [HttpPatch("{rpgSystemId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(500)]
         public IActionResult PublishRpgSystem(int rpgSystemId)
@@ -139,6 +155,27 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok("Succesfully published.");
+        }
+
+        [HttpDelete("{rpgSystemId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(500)]
+
+        public IActionResult DeleteRpgSystem(int rpgSystemId)
+        {
+            if (!_rpgSystemRepository.RpgSystemExists(rpgSystemId))
+            {
+                return NotFound();
+            }
+
+            if (!_rpgSystemRepository.DeleteRpgSystem(rpgSystemId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the {rpgSystemId} system.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully deleted.");
         }
     }
 }

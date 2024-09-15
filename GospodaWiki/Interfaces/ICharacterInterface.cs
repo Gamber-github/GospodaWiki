@@ -3,8 +3,8 @@ namespace GospodaWiki.Interfaces
 {
     public interface ICharacterInterface
     {
-        ICollection<CharactersDto> GetCharacters();
-        ICollection<CharactersDto> GetUnpublishedCharacters();
+        ICollection<GetCharactersDto> GetCharacters();
+        ICollection<GetCharactersDto> GetUnpublishedCharacters();
         CharacterDetailsDto GetCharacter(int id);
         CharacterDetailsDto GetUnpublishedCharacter(int characterId);
         bool CharacterExists(int characterId);
@@ -13,5 +13,6 @@ namespace GospodaWiki.Interfaces
         bool Save();
         Task<bool> SaveAsync();
         bool PublishCharacter(int characterId);
+        bool DeleteCharacter(int characterId);
     }
 }

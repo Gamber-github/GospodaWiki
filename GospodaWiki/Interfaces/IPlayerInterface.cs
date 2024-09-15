@@ -1,5 +1,4 @@
 ﻿using GospodaWiki.Dto.Player;
-using GospodaWiki.Models;
 
 namespace GospodaWiki.Interfaces
 {
@@ -14,5 +13,6 @@ namespace GospodaWiki.Interfaces
         public bool UpdatePlayer(PutPlayerDto player, int playerId);
         public bool PublishPlayer(int playerId);
         public bool Save();
+        public bool DeletePlayer(int playerId);
     }
 }

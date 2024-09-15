@@ -2,7 +2,7 @@
 using GospodaWiki.Dto.Player;
 using GospodaWiki.Dto.Tag;
 using GospodaWiki.Interfaces;
-using GospodaWiki.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GospodaWiki.Controllers
@@ -21,21 +21,33 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<GetPlayersDto>))]
         public IActionResult GetUnpublishedPlayers(int pageNumber = 1, int pageSize = 10)
         {
-            var players = _mapper.Map<List<GetPlayersDto>>(_playerRepository.GetUnpublishedPlayers());
-            var pagedPlayers = players.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedPlayers = _mapper.Map<List<GetTagDetailsDto>>(pagedPlayers);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            return Ok(mappedPlayers);
+
+            var players = _mapper.Map<List<GetPlayersDto>>(_playerRepository.GetUnpublishedPlayers());
+            var pagedPlayers = players.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedPlayers = _mapper.Map<List<GetPlayersDto>>(pagedPlayers);
+
+            var response = new PlayerDTOPagedListDTO
+            {
+                Items = (IEnumerable<GetPlayersDto>)mappedPlayers,
+                totalItemCount = players.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{playerId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(GetPlayerDetailsDto))]
         [ProducesResponseType(400)]
         public IActionResult GetUnpublishedPlayer([FromRoute] int playerId)
@@ -60,6 +72,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreatePlayer ([FromBody] PostPlayerDto playerCreate)
@@ -94,6 +107,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{playerId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -126,6 +140,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{playerId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -144,5 +159,26 @@ namespace GospodaWiki.Controllers
 
             return Ok("Succesfully Published");
         }
+
+        [HttpDelete("{playerId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+
+        public IActionResult DeletePlayer([FromRoute] int playerId)
+        {
+            if (!_playerRepository.PlayerExists(playerId))
+            {
+                return NotFound();
+            }
+
+            if (!_playerRepository.DeletePlayer(playerId))
+            {
+                StatusCode(500, "Nie można usunąć gracza");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Gracz usunięty");
+        }
+
     }
 }

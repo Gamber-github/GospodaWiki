@@ -2,6 +2,7 @@
 using GospodaWiki.Interfaces;
 using AutoMapper;
 using GospodaWiki.Dto.Character;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GospodaWiki.Controllers
 {
@@ -18,22 +19,33 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<CharactersDto>))]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<GetCharactersDto>))]
         public IActionResult GetUnpublishedCharacters(int pageNumber = 1, int pageSize = 10)
         {
-            var characters = _mapper.Map<List<CharactersDto>>(_characterRepository.GetUnpublishedCharacters());
-            var pagedCharacters = characters.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            var mappedCharacters = _mapper.Map<List<CharactersDto>>(pagedCharacters);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok(mappedCharacters);    
+            var characters = _mapper.Map<List<GetCharactersDto>>(_characterRepository.GetUnpublishedCharacters());
+            var pagedCharacters = characters.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var mappedCharacters = _mapper.Map<List<GetCharactersDto>>(pagedCharacters);
+
+            var response = new CharacterDTOPagedListDto
+            {
+                Items = (IEnumerable<GetCharactersDto>)mappedCharacters,
+                totalItemCount = characters.Count,
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            };
+
+            return Ok(response);    
         }
 
         [HttpGet("{characterId}")]
+        [Authorize]
         [ProducesResponseType(200, Type = typeof(CharacterDetailsDto))]
         [ProducesResponseType(400)]
 
@@ -60,6 +72,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateCharacter([FromBody] PostCharacterDto characterCreate)
@@ -94,6 +107,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPut("{characterId}")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -127,6 +141,7 @@ namespace GospodaWiki.Controllers
         }
 
         [HttpPatch("{characterId}/publish")]
+        [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult PublishCharacter([FromRoute] int characterId)
@@ -144,6 +159,27 @@ namespace GospodaWiki.Controllers
             }
 
             return Ok("Succesfully Published");
+        }
+
+        [HttpDelete("{characterId}")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+
+        public IActionResult DeleteCharacter([FromRoute] int characterId)
+        {
+            if (!_characterRepository.CharacterExists(characterId))
+            {
+                return NotFound();
+            }
+
+            if (!_characterRepository.DeleteCharacter(characterId))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting the character.");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Succesfully Deleted");
         }
     }
 }

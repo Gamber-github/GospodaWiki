@@ -17,10 +17,40 @@ namespace GospodaWiki.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("AdventureCharacter", b =>
+                {
+                    b.Property<int>("AdventuresAdventureId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CharactersCharacterId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AdventuresAdventureId", "CharactersCharacterId");
+
+                    b.HasIndex("CharactersCharacterId");
+
+                    b.ToTable("CharacterAdventures", (string)null);
+                });
+
+            modelBuilder.Entity("AdventureTag", b =>
+                {
+                    b.Property<int>("AdventuresAdventureId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagsTagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AdventuresAdventureId", "TagsTagId");
+
+                    b.HasIndex("TagsTagId");
+
+                    b.ToTable("AdventureTags", (string)null);
+                });
 
             modelBuilder.Entity("CharacterItem", b =>
                 {
@@ -65,6 +95,103 @@ namespace GospodaWiki.Migrations
                     b.HasIndex("TagsTagId");
 
                     b.ToTable("EventTags", (string)null);
+                });
+
+            modelBuilder.Entity("GospodaWiki.Models.Adventure", b =>
+                {
+                    b.Property<int>("AdventureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdventureId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RpgSystemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SeriesId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isPublished")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AdventureId");
+
+                    b.HasIndex("RpgSystemId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("Adventures");
+                });
+
+            modelBuilder.Entity("GospodaWiki.Models.AppUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Character", b =>
@@ -333,6 +460,9 @@ namespace GospodaWiki.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("GameMasterId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -347,42 +477,11 @@ namespace GospodaWiki.Migrations
 
                     b.HasKey("SeriesId");
 
+                    b.HasIndex("GameMasterId");
+
                     b.HasIndex("RpgSystemId");
 
                     b.ToTable("Series");
-                });
-
-            modelBuilder.Entity("GospodaWiki.Models.Story", b =>
-                {
-                    b.Property<int>("StoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StoryId"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RpgSystemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("YoutubeVideoUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("isPublished")
-                        .HasColumnType("bit");
-
-                    b.HasKey("StoryId");
-
-                    b.HasIndex("RpgSystemId")
-                        .IsUnique();
-
-                    b.ToTable("Stories");
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Tag", b =>
@@ -404,31 +503,6 @@ namespace GospodaWiki.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("GospodaWiki.Models.User", b =>
-                {
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Email");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("ItemTag", b =>
                 {
                     b.Property<int>("ItemsItemId")
@@ -442,6 +516,153 @@ namespace GospodaWiki.Migrations
                     b.HasIndex("TagsTagId");
 
                     b.ToTable("ItemsTags", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "984ea005-c679-44a6-9df7-6f7bb726ab56",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "c9757a4b-2e6d-4db1-896c-fac6bc179a61",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("PlayerSeries", b =>
@@ -489,19 +710,34 @@ namespace GospodaWiki.Migrations
                     b.ToTable("SeriesTags", (string)null);
                 });
 
-            modelBuilder.Entity("StoryTag", b =>
+            modelBuilder.Entity("AdventureCharacter", b =>
                 {
-                    b.Property<int>("StoriesStoryId")
-                        .HasColumnType("int");
+                    b.HasOne("GospodaWiki.Models.Adventure", null)
+                        .WithMany()
+                        .HasForeignKey("AdventuresAdventureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("TagsTagId")
-                        .HasColumnType("int");
+                    b.HasOne("GospodaWiki.Models.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharactersCharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.HasKey("StoriesStoryId", "TagsTagId");
+            modelBuilder.Entity("AdventureTag", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.Adventure", null)
+                        .WithMany()
+                        .HasForeignKey("AdventuresAdventureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasIndex("TagsTagId");
-
-                    b.ToTable("StoryTags", (string)null);
+                    b.HasOne("GospodaWiki.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CharacterItem", b =>
@@ -547,6 +783,21 @@ namespace GospodaWiki.Migrations
                         .HasForeignKey("TagsTagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GospodaWiki.Models.Adventure", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
+                        .WithMany("Adventures")
+                        .HasForeignKey("RpgSystemId");
+
+                    b.HasOne("GospodaWiki.Models.Series", "Series")
+                        .WithMany("Adventures")
+                        .HasForeignKey("SeriesId");
+
+                    b.Navigation("RpgSystem");
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Character", b =>
@@ -602,20 +853,15 @@ namespace GospodaWiki.Migrations
 
             modelBuilder.Entity("GospodaWiki.Models.Series", b =>
                 {
+                    b.HasOne("GospodaWiki.Models.Player", "GameMaster")
+                        .WithMany()
+                        .HasForeignKey("GameMasterId");
+
                     b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
                         .WithMany("Series")
                         .HasForeignKey("RpgSystemId");
 
-                    b.Navigation("RpgSystem");
-                });
-
-            modelBuilder.Entity("GospodaWiki.Models.Story", b =>
-                {
-                    b.HasOne("GospodaWiki.Models.RpgSystem", "RpgSystem")
-                        .WithOne("Story")
-                        .HasForeignKey("GospodaWiki.Models.Story", "RpgSystemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("GameMaster");
 
                     b.Navigation("RpgSystem");
                 });
@@ -631,6 +877,57 @@ namespace GospodaWiki.Migrations
                     b.HasOne("GospodaWiki.Models.Tag", null)
                         .WithMany()
                         .HasForeignKey("TagsTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GospodaWiki.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("GospodaWiki.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -680,21 +977,6 @@ namespace GospodaWiki.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StoryTag", b =>
-                {
-                    b.HasOne("GospodaWiki.Models.Story", null)
-                        .WithMany()
-                        .HasForeignKey("StoriesStoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GospodaWiki.Models.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("GospodaWiki.Models.Character", b =>
                 {
                     b.Navigation("Image");
@@ -717,17 +999,19 @@ namespace GospodaWiki.Migrations
 
             modelBuilder.Entity("GospodaWiki.Models.RpgSystem", b =>
                 {
+                    b.Navigation("Adventures");
+
                     b.Navigation("Characters");
 
                     b.Navigation("Image");
 
                     b.Navigation("Series");
-
-                    b.Navigation("Story");
                 });
 
             modelBuilder.Entity("GospodaWiki.Models.Series", b =>
                 {
+                    b.Navigation("Adventures");
+
                     b.Navigation("Characters");
                 });
 #pragma warning restore 612, 618
